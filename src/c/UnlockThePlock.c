@@ -492,9 +492,9 @@ static void draw_cb(Layer *layer, GContext *ctx) {
     GFont tf = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
     GFont sf = fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD);
 #ifdef PBL_ROUND
-    int ty = cy - 74;
+    int ty = cy - 66;
 #else
-    int ty = cy - 88;
+    int ty = cy - 80;
 #endif
 #ifdef PBL_COLOR
     graphics_context_set_text_color(ctx, GColorIcterine);
