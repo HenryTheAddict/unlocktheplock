@@ -75,6 +75,8 @@ typedef struct {
   int     hhs;       /* hardcore high score              */
   bool    new_hs;
   bool    zen_miss;  /* missed in zen mode?              */
+  int32_t z_last_ang;/* last miss angle (zen anti-spam)  */
+  int     z_spam;    /* spam hit count                   */
   int     flash;     /* corner-flash countdown           */
   GColor  fcol;
   int     shake;     /* screen-shake countdown           */
@@ -264,6 +266,7 @@ static void g_reset(void) {
   G.pause_cd  = 0;
   G.trail_f   = 256;
   G.zen_miss  = false;
+  G.z_spam    = 0;
   G.pop_t     = 0;
   G.shine_t   = 0;
 }
@@ -277,6 +280,7 @@ static void g_start(void) {
   G.cw      = true;
   G.new_hs  = false;
   G.zen_miss = false;
+  G.z_spam    = 0;
   G.flash   = 0;
   G.shake   = 0;
   G.sx = G.sy = 0;
@@ -341,6 +345,7 @@ static void g_select(void) {
     G.st      = ST_SUCCESS;
     G.flash   = FLASH_DUR;
     G.zen_miss = false;
+    G.z_spam    = 0;
     G.shake   = 6;                  /* small satisfying hit shake */
     G.pop_r   = RING_RADIUS;        /* start expanding ring pulse */
     G.pop_t   = POP_FRAMES;
@@ -360,6 +365,17 @@ static void g_select(void) {
   } else {
     /* ── MISS ── */
     if (G.mode == MODE_ZEN) {
+      /* Anti-spam: check if spamming same area */
+      if (ang_dist(G.angle, G.z_last_ang) < TRIG_MAX_ANGLE / 24) {
+        if (++G.z_spam > 3) {
+          /* Spam detected -> Fail */
+          goto zen_fail;
+        }
+      } else {
+        G.z_last_ang = G.angle;
+        G.z_spam     = 1;
+      }
+
       /* Zen mode: forgive the miss, keep going */
       G.st    = ST_SUCCESS;
       G.flash = FLASH_DUR;
@@ -374,6 +390,7 @@ static void g_select(void) {
       vibes_double_pulse();
       return;
     }
+    zen_fail:
     G.st    = ST_FAIL;
     G.flash = FLASH_DUR * 2;
     G.shake = SHAKE_DUR;
