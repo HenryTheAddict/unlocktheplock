@@ -7,10 +7,12 @@
 /* ══════════════════════════════════════════════════════════════════
  *  Platform geometry
  * ══════════════════════════════════════════════════════════════════ */
-#ifdef PBL_ROUND
+#if defined(PBL_ROUND)
   #define RING_RADIUS  72
-#else
+#elif defined(PBL_PLATFORM_EMERY)
   #define RING_RADIUS  82
+#else
+  #define RING_RADIUS  64
 #endif
 
 #define RING_THICK   6
@@ -228,10 +230,14 @@ static void stars_draw(GContext *ctx, int w, int h) {
 
     if (x1 < 0 || x1 >= w || y1 < 0 || y1 >= h) continue;
 
+#ifdef PBL_COLOR
     GColor col = (G.stars[i].z < 80)  ? GColorWhite
                : (G.stars[i].z < 150) ? GColorPictonBlue
                : (G.stars[i].z < 200) ? GColorCobaltBlue
                :                        GColorDarkGray;
+#else
+    GColor col = GColorWhite;
+#endif
 
     graphics_context_set_stroke_color(ctx, col);
     graphics_context_set_stroke_width(ctx, (G.stars[i].z < 100) ? 2 : 1);
