@@ -204,31 +204,38 @@ static void stars_init(int w, int h) {
 static void stars_draw(GContext *ctx, int w, int h) {
   int cx  = w / 2;
   int cy  = h / 2;
-  int spd = (G.st == ST_PLAYING) ? (G.spd / 40 + 2) : 2;
+#ifndef PBL_COLOR
+  (void)ctx; (void)cx; (void)cy; (void)w; (void)h;
+  return; /* Simplified B&W: No background starfield */
+#endif
+
+  int spd = (G.st == ST_PLAYING) ? (G.spd / 30 + 4) : 2;
 
   for (int i = 0; i < NSTARS; i++) {
+    int32_t last_z = G.stars[i].z;
     G.stars[i].z -= spd;
     if (G.stars[i].z <= 0) {
       G.stars[i].z = 256;
       G.stars[i].x = (rand() % w - w / 2) << 8;
       G.stars[i].y = (rand() % h - h / 2) << 8;
+      last_z = 256;
     }
-    int x = cx + (G.stars[i].x / G.stars[i].z);
-    int y = cy + (G.stars[i].y / G.stars[i].z);
-    if (x < 0 || x >= w || y < 0 || y >= h) continue;
-#ifdef PBL_COLOR
-    GColor col = (G.stars[i].z < 100) ? GColorWhite
-               : (G.stars[i].z < 180) ? GColorLightGray
+
+    int x1 = cx + (G.stars[i].x / G.stars[i].z);
+    int y1 = cy + (G.stars[i].y / G.stars[i].z);
+    int x2 = cx + (G.stars[i].x / last_z);
+    int y2 = cy + (G.stars[i].y / last_z);
+
+    if (x1 < 0 || x1 >= w || y1 < 0 || y1 >= h) continue;
+
+    GColor col = (G.stars[i].z < 80)  ? GColorWhite
+               : (G.stars[i].z < 150) ? GColorPictonBlue
+               : (G.stars[i].z < 200) ? GColorCobaltBlue
                :                        GColorDarkGray;
-    graphics_context_set_fill_color(ctx, col);
-#else
-    graphics_context_set_fill_color(ctx, GColorWhite);
-#endif
-    if (G.stars[i].z < 80) {
-      graphics_fill_rect(ctx, GRect(x, y, 2, 2), 0, GCornerNone);
-    } else {
-      graphics_draw_pixel(ctx, GPoint(x, y));
-    }
+
+    graphics_context_set_stroke_color(ctx, col);
+    graphics_context_set_stroke_width(ctx, (G.stars[i].z < 100) ? 2 : 1);
+    graphics_draw_line(ctx, GPoint(x1, y1), GPoint(x2, y2));
   }
 }
 
@@ -420,15 +427,12 @@ static void draw_cb(Layer *layer, GContext *ctx) {
 #endif
 
   /* ── radial speed lines (gameplay only) ── */
+#ifdef PBL_COLOR
   if (G.st == ST_PLAYING || G.st == ST_PAUSED) {
     int32_t step   = TRIG_MAX_ANGLE / 8;
     int32_t offset = ang_wrap((int32_t)G.frame * G.spd / 400);
     graphics_context_set_stroke_width(ctx, 1);
-#ifdef PBL_COLOR
     graphics_context_set_stroke_color(ctx, GColorDarkGray);
-#else
-    graphics_context_set_stroke_color(ctx, GColorDarkGray);
-#endif
     for (int i = 0; i < 8; i++) {
       int32_t a = ang_wrap(offset + i * step);
       graphics_draw_line(ctx,
@@ -436,6 +440,7 @@ static void draw_cb(Layer *layer, GContext *ctx) {
         radius_pt(a, cx, cy, R + 38));
     }
   }
+#endif
 
   /* ════════════════════════════════════════════════════════════
    *  TITLE SCREEN
