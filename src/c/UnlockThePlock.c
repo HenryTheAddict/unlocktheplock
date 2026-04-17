@@ -74,6 +74,7 @@ typedef struct {
   int     hs;        /* classic high score               */
   int     hhs;       /* hardcore high score              */
   bool    new_hs;
+  bool    zen_miss;  /* missed in zen mode?              */
   int     flash;     /* corner-flash countdown           */
   GColor  fcol;
   int     shake;     /* screen-shake countdown           */
@@ -258,6 +259,7 @@ static void g_reset(void) {
   G.sx = G.sy = 0;
   G.level_pop = 0;
   G.pause_cd  = 0;
+  G.zen_miss  = false;
   G.pop_t     = 0;
   G.shine_t   = 0;
 }
@@ -270,6 +272,7 @@ static void g_start(void) {
   G.tol     = (G.mode == MODE_HARDCORE) ? (TOL_INIT * 4 / 5) : TOL_INIT;
   G.cw      = true;
   G.new_hs  = false;
+  G.zen_miss = false;
   G.flash   = 0;
   G.shake   = 0;
   G.sx = G.sy = 0;
@@ -283,24 +286,36 @@ static void g_start(void) {
 }
 
 static void g_next(void) {
-  if (G.mode == MODE_HARDCORE) {
-    if (G.level > G.hhs) {
-      G.hhs = G.level;
-      G.new_hs = true;
-      persist_write_int(PK_HHS, G.hhs);
+  if (G.mode == MODE_ZEN && G.zen_miss) {
+    /* missed in Zen: don't increment level or difficulty */
+  } else {
+    if (G.mode == MODE_HARDCORE) {
+      if (G.level > G.hhs) {
+        G.hhs = G.level;
+        G.new_hs = true;
+        persist_write_int(PK_HHS, G.hhs);
+      }
+    } else if (G.mode == MODE_CLASSIC) {
+      if (G.level > G.hs) {
+        G.hs = G.level;
+        G.new_hs = true;
+        persist_write_int(PK_HS, G.hs);
+      }
     }
-  } else if (G.mode == MODE_CLASSIC) {
-    if (G.level > G.hs) {
-      G.hs = G.level;
-      G.new_hs = true;
-      persist_write_int(PK_HS, G.hs);
-    }
+    G.level++;
+    int inc = (G.mode == MODE_HARDCORE) ? (SPD_INC * 3 / 2)
+            : (G.mode == MODE_ZEN)      ? (SPD_INC / 2)
+            :                             SPD_INC;
+    G.spd += inc;
+    if (G.spd > SPD_MAX) G.spd = SPD_MAX;
+
+    int dec = (G.mode == MODE_HARDCORE) ? (TOL_DEC * 6 / 5)
+            : (G.mode == MODE_ZEN)      ? (TOL_DEC / 2)
+            :                             TOL_DEC;
+    G.tol -= dec;
+    if (G.tol < TOL_MIN) G.tol = TOL_MIN;
   }
-  G.level++;
-  G.spd += (G.mode == MODE_HARDCORE) ? (SPD_INC * 3 / 2) : SPD_INC;
-  if (G.spd > SPD_MAX) G.spd = SPD_MAX;
-  G.tol -= (G.mode == MODE_HARDCORE) ? (TOL_DEC * 6 / 5) : TOL_DEC;
-  if (G.tol < TOL_MIN) G.tol = TOL_MIN;
+
   G.cw      = !G.cw;
   G.level_pop = 12;
   G.travel  = 0;
@@ -319,6 +334,7 @@ static void g_select(void) {
     /* ── HIT ── */
     G.st      = ST_SUCCESS;
     G.flash   = FLASH_DUR;
+    G.zen_miss = false;
     G.shake   = 6;                  /* small satisfying hit shake */
     G.pop_r   = RING_RADIUS;        /* start expanding ring pulse */
     G.pop_t   = POP_FRAMES;
@@ -341,6 +357,7 @@ static void g_select(void) {
       /* Zen mode: forgive the miss, keep going */
       G.st    = ST_SUCCESS;
       G.flash = FLASH_DUR;
+      G.zen_miss = true;
       G.pop_r = RING_RADIUS;
       G.pop_t = POP_FRAMES / 2;
 #ifdef PBL_COLOR
