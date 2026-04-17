@@ -753,6 +753,7 @@ static void draw_cb(Layer *layer, GContext *ctx) {
 
   /* ── centre HUD ── */
   GFont bf = fonts_get_system_font(FONT_KEY_LECO_42_NUMBERS);
+  GFont af = fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD);
   GFont tf = fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD);
   static char lvl_buf[8];
   snprintf(lvl_buf, sizeof(lvl_buf), "%d", G.level);
@@ -788,8 +789,8 @@ static void draw_cb(Layer *layer, GContext *ctx) {
         GRect(cx-50, cy-28, 100, 64),
         GTextOverflowModeFill, GTextAlignmentCenter, NULL);
     } else {
-      graphics_draw_text(ctx, "PAUSED", bf,
-        GRect(cx-50, cy-28, 100, 64),
+      graphics_draw_text(ctx, "PAUSED", af,
+        GRect(cx-50, cy-20, 100, 32),
         GTextOverflowModeFill, GTextAlignmentCenter, NULL);
 
       graphics_draw_text(ctx, "back to resume", tf,
