@@ -39,7 +39,7 @@
 #define TOL_DEC      85
 #define FLASH_DUR    12
 #define SHAKE_DUR    16
-#define NPARTS       24
+#define NPARTS       36
 #define NSTARS       40
 #define PAUSE_CD     60   /* ~2 s at 30 fps             */
 #define POP_FRAMES   24   /* ring-pulse animation len   */
@@ -90,6 +90,7 @@ typedef struct {
   int     pause_cd;
   int32_t title_ang;
   int32_t travel;    /* distance traveled in current turn */
+  int     trail_f;   /* trail flip interpolation (0-256)  */
   int     frame;
 } Game;
 
@@ -146,8 +147,8 @@ static GColor pcolor(int i) {
 
 static void parts_emit(int cx, int cy) {
   for (int i = 0; i < NPARTS; i++) {
-    int32_t a = (TRIG_MAX_ANGLE * i) / NPARTS + (rand() % 2000 - 1000);
-    int spd   = 3 + (rand() % 6);
+    int32_t a = (TRIG_MAX_ANGLE * i) / NPARTS + (rand() % 3000 - 1500);
+    int spd   = 4 + (rand() % 8);
     G.p[i].x       = cx * 256;
     G.p[i].y       = cy * 256;
     G.p[i].vx      = sin_lookup(a) * spd >> 7;
@@ -166,7 +167,9 @@ static void parts_update(void) {
     if (G.p[i].life <= 0) continue;
     G.p[i].x  += G.p[i].vx;
     G.p[i].y  += G.p[i].vy;
-    G.p[i].vy += 15; /* gravity reduced slightly for "floatier" feel */
+    G.p[i].vx  = (G.p[i].vx * 248) >> 8; /* air resistance */
+    G.p[i].vy  = (G.p[i].vy * 248) >> 8;
+    G.p[i].vy += 20; /* gravity */
     G.p[i].life--;
 
     /* fade out color if possible */
@@ -259,6 +262,7 @@ static void g_reset(void) {
   G.sx = G.sy = 0;
   G.level_pop = 0;
   G.pause_cd  = 0;
+  G.trail_f   = 256;
   G.zen_miss  = false;
   G.pop_t     = 0;
   G.shine_t   = 0;
@@ -279,6 +283,7 @@ static void g_start(void) {
   G.p_on    = false;
   G.level_pop = 0;
   G.pause_cd  = 0;
+  G.trail_f   = 256;
   G.pop_t   = 0;
   G.shine_t = 0;
   G.travel  = 0;
@@ -317,6 +322,7 @@ static void g_next(void) {
   }
 
   G.cw      = !G.cw;
+  G.trail_f = 0;
   G.level_pop = 12;
   G.travel  = 0;
   G.target  = (int32_t)(rand() % TRIG_MAX_ANGLE);
@@ -488,6 +494,13 @@ static void draw_cb(Layer *layer, GContext *ctx) {
 #endif
     graphics_fill_circle(ctx, ip, IND_R);
 
+    /* mode-specific color */
+    GColor mode_col = GColorIcterine;
+#ifdef PBL_COLOR
+    if (G.mode == MODE_HARDCORE) mode_col = GColorImperialPurple;
+    if (G.mode == MODE_ZEN)      mode_col = GColorMediumSpringGreen;
+#endif
+
     /* title */
     GFont tf = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
     GFont sf = fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD);
@@ -497,7 +510,7 @@ static void draw_cb(Layer *layer, GContext *ctx) {
     int ty = cy - 80;
 #endif
 #ifdef PBL_COLOR
-    graphics_context_set_text_color(ctx, GColorIcterine);
+    graphics_context_set_text_color(ctx, mode_col);
 #else
     graphics_context_set_text_color(ctx, GColorWhite);
 #endif
@@ -528,7 +541,7 @@ static void draw_cb(Layer *layer, GContext *ctx) {
     graphics_fill_rect(ctx, GRect(cx-40, cy+29, 80, 15), 2, GCornersAll);
 
 #ifdef PBL_COLOR
-    graphics_context_set_text_color(ctx, GColorIcterine);
+    graphics_context_set_text_color(ctx, mode_col);
 #else
     graphics_context_set_text_color(ctx, GColorBlack);
 #endif
@@ -648,9 +661,11 @@ static void draw_cb(Layer *layer, GContext *ctx) {
 #ifdef PBL_COLOR
   {
     int dir = G.cw ? 1 : -1;
+    /* smooth interpolation for trail direction change */
+    int32_t flip_off = (256 - G.trail_f) * (TRIG_MAX_ANGLE / 24) >> 8;
     static const int tsz[TRAIL_LEN] = {4,4,4,3,2};
     for (int t = TRAIL_LEN; t >= 1; t--) {
-      int32_t ta  = ang_wrap(ind - dir * t * (TRIG_MAX_ANGLE / 46));
+      int32_t ta  = ang_wrap(ind - dir * t * (TRIG_MAX_ANGLE / 46) + (dir * flip_off));
       GPoint  tp2 = ring_pt(ta, cx, cy);
       GColor tc;
       switch (t) {
@@ -821,6 +836,10 @@ static void tick(void *unused) {
 
   /* level-pop bounce decay */
   if (G.level_pop > 0) G.level_pop--;
+
+  /* trail flip interpolation */
+  if (G.trail_f < 256) G.trail_f += 32;
+  if (G.trail_f > 256) G.trail_f = 256;
 
   /* pause cooldown */
   if (G.pause_cd > 0) G.pause_cd--;
