@@ -35,13 +35,13 @@
 #define TOL_INIT   3600   /* ~20° window to start       */
 #define TOL_MIN    1000   /* ~5.5° window at max diff   */
 #define TOL_DEC      85
-#define FLASH_DUR    15
-#define SHAKE_DUR    14
+#define FLASH_DUR    12
+#define SHAKE_DUR    16
 #define NPARTS       24
 #define NSTARS       40
 #define PAUSE_CD     60   /* ~2 s at 30 fps             */
 #define POP_FRAMES   24   /* ring-pulse animation len   */
-#define POP_SPEED     3   /* px/frame ring expansion    */
+#define POP_SPEED     5   /* px/frame ring expansion    */
 #define SHINE_FRAMES  8   /* ring gold-flash frames     */
 #define TRAIL_LEN     5   /* trail dots behind orb      */
 
@@ -167,8 +167,11 @@ static void parts_update(void) {
 
     /* fade out color if possible */
 #ifdef PBL_COLOR
-    if (G.p[i].life < 8) {
-       if (G.p[i].life % 2 == 0) G.p[i].col = GColorDarkGray;
+    if (G.p[i].life < 12) {
+      // Shift towards black/darker shades as they die
+      if (G.p[i].life < 4) G.p[i].col = GColorBlack;
+      else if (G.p[i].life < 8) G.p[i].col = GColorDarkGray;
+      else if (G.p[i].life < 12) G.p[i].col = GColorLightGray;
     }
 #endif
     any = true;
@@ -180,7 +183,7 @@ static void parts_draw(GContext *ctx) {
   for (int i = 0; i < NPARTS; i++) {
     if (G.p[i].life <= 0) continue;
     int sz = G.p[i].sz * G.p[i].life / G.p[i].maxlife;
-    if (sz < 1) sz = 1;
+    if (sz < 1) continue; // Shrink to zero and disappear
     graphics_context_set_fill_color(ctx, G.p[i].col);
     graphics_fill_circle(ctx, GPoint(G.p[i].x / 256, G.p[i].y / 256), sz);
   }
@@ -300,6 +303,7 @@ static void g_select(void) {
     /* ── HIT ── */
     G.st      = ST_SUCCESS;
     G.flash   = FLASH_DUR;
+    G.shake   = 6;                  /* small satisfying hit shake */
     G.pop_r   = RING_RADIUS;        /* start expanding ring pulse */
     G.pop_t   = POP_FRAMES;
     G.shine_t = SHINE_FRAMES;       /* ring briefly turns gold    */
@@ -311,7 +315,9 @@ static void g_select(void) {
     GRect bnd = layer_get_bounds(s_cvs);
     GPoint ip = ring_pt(G.angle, bnd.size.w/2 + G.sx, bnd.size.h/2 + G.sy);
     parts_emit(ip.x, ip.y);
-    vibes_short_pulse();
+    static const uint32_t segments[] = { 30, 20, 30 };
+    VibePattern pat = { .durations = segments, .num_segments = 3 };
+    vibes_enqueue_custom_pattern(pat);
     light_enable_interaction();
   } else {
     /* ── MISS ── */
@@ -470,22 +476,22 @@ static void draw_cb(Layer *layer, GContext *ctx) {
     graphics_fill_circle(ctx, ip, IND_R);
 
     /* title */
-    GFont tf = fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD);
+    GFont tf = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
     GFont sf = fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD);
 #ifdef PBL_ROUND
-    int ty = cy - 64;
+    int ty = cy - 70;
 #else
-    int ty = cy - 78;
+    int ty = cy - 84;
 #endif
 #ifdef PBL_COLOR
     graphics_context_set_text_color(ctx, GColorChromeYellow);
 #else
     graphics_context_set_text_color(ctx, GColorWhite);
 #endif
-    graphics_draw_text(ctx, "UNLOCK", tf, GRect(cx-50, ty, 100, 22),
+    graphics_draw_text(ctx, "UNLOCK", tf, GRect(cx-60, ty, 120, 28),
       GTextOverflowModeFill, GTextAlignmentCenter, NULL);
     graphics_context_set_text_color(ctx, GColorWhite);
-    graphics_draw_text(ctx, "THE PLOCK", tf, GRect(cx-56, ty+21, 112, 22),
+    graphics_draw_text(ctx, "THE PLOCK", tf, GRect(cx-70, ty+24, 140, 28),
       GTextOverflowModeFill, GTextAlignmentCenter, NULL);
 
     /* pulsing instruction */
@@ -497,7 +503,7 @@ static void draw_cb(Layer *layer, GContext *ctx) {
       graphics_context_set_text_color(ctx, GColorWhite);
 #endif
       graphics_draw_text(ctx, "PRESS SELECT", ifont,
-        GRect(cx-70, cy-18, 140, 30),
+        GRect(cx-70, cy-14, 140, 30),
         GTextOverflowModeFill, GTextAlignmentCenter, NULL);
     }
 
@@ -509,7 +515,7 @@ static void draw_cb(Layer *layer, GContext *ctx) {
     graphics_context_set_text_color(ctx, GColorWhite);
 #endif
     graphics_draw_text(ctx, modes[G.mode], sf,
-      GRect(cx-50, cy+22, 100, 18),
+      GRect(cx-50, cy+28, 100, 18),
       GTextOverflowModeFill, GTextAlignmentCenter, NULL);
 
     /* best score */
@@ -520,7 +526,7 @@ static void draw_cb(Layer *layer, GContext *ctx) {
       else        snprintf(hsbuf, sizeof(hsbuf), "BEST: --");
       graphics_context_set_text_color(ctx, GColorLightGray);
       graphics_draw_text(ctx, hsbuf, sf,
-        GRect(cx-40, cy+40, 80, 18),
+        GRect(cx-40, cy+46, 80, 18),
         GTextOverflowModeFill, GTextAlignmentCenter, NULL);
     }
     return;
