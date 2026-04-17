@@ -86,6 +86,7 @@ typedef struct {
   int     level_pop; /* level-number bounce countdown    */
   int     pause_cd;
   int32_t title_ang;
+  int32_t travel;    /* distance traveled in current turn */
   int     frame;
 } Game;
 
@@ -264,6 +265,7 @@ static void g_start(void) {
   G.pause_cd  = 0;
   G.pop_t   = 0;
   G.shine_t = 0;
+  G.travel  = 0;
   G.target  = (int32_t)(rand() % TRIG_MAX_ANGLE);
 }
 
@@ -288,6 +290,7 @@ static void g_next(void) {
   if (G.tol < TOL_MIN) G.tol = TOL_MIN;
   G.cw      = !G.cw;
   G.level_pop = 12;
+  G.travel  = 0;
   G.target  = (int32_t)(rand() % TRIG_MAX_ANGLE);
 }
 
@@ -820,6 +823,19 @@ static void tick(void *unused) {
 
     case ST_PLAYING:
       G.angle = ang_wrap(G.angle + (G.cw ? G.spd : -G.spd));
+      G.travel += G.spd;
+      if (G.mode != MODE_ZEN && G.travel > TRIG_MAX_ANGLE * 2) {
+        /* Failed to hit target within 2 full loops */
+        G.st    = ST_FAIL;
+        G.flash = FLASH_DUR * 2;
+        G.shake = SHAKE_DUR;
+#ifdef PBL_COLOR
+        G.fcol = GColorRed;
+#else
+        G.fcol = GColorWhite;
+#endif
+        vibes_double_pulse();
+      }
       break;
 
     case ST_SUCCESS:
