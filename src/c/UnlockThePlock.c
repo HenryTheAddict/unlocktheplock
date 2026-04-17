@@ -7,10 +7,12 @@
 /* ══════════════════════════════════════════════════════════════════
  *  Platform geometry
  * ══════════════════════════════════════════════════════════════════ */
-#ifdef PBL_ROUND
+#if defined(PBL_ROUND)
   #define RING_RADIUS  72
-#else
+#elif defined(PBL_PLATFORM_EMERY)
   #define RING_RADIUS  82
+#else
+  #define RING_RADIUS  64
 #endif
 
 #define RING_THICK   6
@@ -35,13 +37,13 @@
 #define TOL_INIT   3600   /* ~20° window to start       */
 #define TOL_MIN    1000   /* ~5.5° window at max diff   */
 #define TOL_DEC      85
-#define FLASH_DUR    15
-#define SHAKE_DUR    14
-#define NPARTS       24
+#define FLASH_DUR    12
+#define SHAKE_DUR    16
+#define NPARTS       36
 #define NSTARS       40
 #define PAUSE_CD     60   /* ~2 s at 30 fps             */
 #define POP_FRAMES   24   /* ring-pulse animation len   */
-#define POP_SPEED     3   /* px/frame ring expansion    */
+#define POP_SPEED     5   /* px/frame ring expansion    */
 #define SHINE_FRAMES  8   /* ring gold-flash frames     */
 #define TRAIL_LEN     5   /* trail dots behind orb      */
 
@@ -72,6 +74,9 @@ typedef struct {
   int     hs;        /* classic high score               */
   int     hhs;       /* hardcore high score              */
   bool    new_hs;
+  bool    zen_miss;  /* missed in zen mode?              */
+  int32_t z_last_ang;/* last miss angle (zen anti-spam)  */
+  int     z_spam;    /* spam hit count                   */
   int     flash;     /* corner-flash countdown           */
   GColor  fcol;
   int     shake;     /* screen-shake countdown           */
@@ -86,6 +91,8 @@ typedef struct {
   int     level_pop; /* level-number bounce countdown    */
   int     pause_cd;
   int32_t title_ang;
+  int32_t travel;    /* distance traveled in current turn */
+  int     trail_f;   /* trail flip interpolation (0-256)  */
   int     frame;
 } Game;
 
@@ -142,14 +149,14 @@ static GColor pcolor(int i) {
 
 static void parts_emit(int cx, int cy) {
   for (int i = 0; i < NPARTS; i++) {
-    int32_t a = (TRIG_MAX_ANGLE * i) / NPARTS + (rand() % 2000 - 1000);
-    int spd   = 3 + (rand() % 6);
+    int32_t a = (TRIG_MAX_ANGLE * i) / NPARTS + (rand() % 3000 - 1500);
+    int spd   = 4 + (rand() % 8);
     G.p[i].x       = cx * 256;
     G.p[i].y       = cy * 256;
     G.p[i].vx      = sin_lookup(a) * spd >> 7;
     G.p[i].vy      = -(cos_lookup(a) * spd >> 7);
-    G.p[i].life    = 22 + (rand() % 14);
-    G.p[i].maxlife = 36;
+    G.p[i].life    = 44 + (rand() % 28);
+    G.p[i].maxlife = 72;
     G.p[i].sz      = 2 + (rand() % 4);
     G.p[i].col     = pcolor(i);
   }
@@ -162,8 +169,20 @@ static void parts_update(void) {
     if (G.p[i].life <= 0) continue;
     G.p[i].x  += G.p[i].vx;
     G.p[i].y  += G.p[i].vy;
+    G.p[i].vx  = (G.p[i].vx * 248) >> 8; /* air resistance */
+    G.p[i].vy  = (G.p[i].vy * 248) >> 8;
     G.p[i].vy += 20; /* gravity */
     G.p[i].life--;
+
+    /* fade out color if possible */
+#ifdef PBL_COLOR
+    if (G.p[i].life < 24) {
+      // Shift towards black/darker shades as they die
+      if (G.p[i].life < 8) G.p[i].col = GColorBlack;
+      else if (G.p[i].life < 16) G.p[i].col = GColorDarkGray;
+      else if (G.p[i].life < 24) G.p[i].col = GColorLightGray;
+    }
+#endif
     any = true;
   }
   G.p_on = any;
@@ -173,7 +192,7 @@ static void parts_draw(GContext *ctx) {
   for (int i = 0; i < NPARTS; i++) {
     if (G.p[i].life <= 0) continue;
     int sz = G.p[i].sz * G.p[i].life / G.p[i].maxlife;
-    if (sz < 1) sz = 1;
+    if (sz < 1) continue; // Shrink to zero and disappear
     graphics_context_set_fill_color(ctx, G.p[i].col);
     graphics_fill_circle(ctx, GPoint(G.p[i].x / 256, G.p[i].y / 256), sz);
   }
@@ -193,31 +212,42 @@ static void stars_init(int w, int h) {
 static void stars_draw(GContext *ctx, int w, int h) {
   int cx  = w / 2;
   int cy  = h / 2;
-  int spd = (G.st == ST_PLAYING) ? (G.spd / 40 + 2) : 2;
+#ifndef PBL_COLOR
+  (void)ctx; (void)cx; (void)cy; (void)w; (void)h;
+  return; /* Simplified B&W: No background starfield */
+#endif
+
+  int spd = (G.st == ST_PLAYING) ? (G.spd / 30 + 4) : 2;
 
   for (int i = 0; i < NSTARS; i++) {
+    int32_t last_z = G.stars[i].z;
     G.stars[i].z -= spd;
     if (G.stars[i].z <= 0) {
       G.stars[i].z = 256;
       G.stars[i].x = (rand() % w - w / 2) << 8;
       G.stars[i].y = (rand() % h - h / 2) << 8;
+      last_z = 256;
     }
-    int x = cx + (G.stars[i].x / G.stars[i].z);
-    int y = cy + (G.stars[i].y / G.stars[i].z);
-    if (x < 0 || x >= w || y < 0 || y >= h) continue;
+
+    int x1 = cx + (G.stars[i].x / G.stars[i].z);
+    int y1 = cy + (G.stars[i].y / G.stars[i].z);
+    int x2 = cx + (G.stars[i].x / last_z);
+    int y2 = cy + (G.stars[i].y / last_z);
+
+    if (x1 < 0 || x1 >= w || y1 < 0 || y1 >= h) continue;
+
 #ifdef PBL_COLOR
-    GColor col = (G.stars[i].z < 100) ? GColorWhite
-               : (G.stars[i].z < 180) ? GColorLightGray
+    GColor col = (G.stars[i].z < 80)  ? GColorWhite
+               : (G.stars[i].z < 150) ? GColorPictonBlue
+               : (G.stars[i].z < 200) ? GColorCobaltBlue
                :                        GColorDarkGray;
-    graphics_context_set_fill_color(ctx, col);
 #else
-    graphics_context_set_fill_color(ctx, GColorWhite);
+    GColor col = GColorWhite;
 #endif
-    if (G.stars[i].z < 80) {
-      graphics_fill_rect(ctx, GRect(x, y, 2, 2), 0, GCornerNone);
-    } else {
-      graphics_draw_pixel(ctx, GPoint(x, y));
-    }
+
+    graphics_context_set_stroke_color(ctx, col);
+    graphics_context_set_stroke_width(ctx, (G.stars[i].z < 100) ? 2 : 1);
+    graphics_draw_line(ctx, GPoint(x1, y1), GPoint(x2, y2));
   }
 }
 
@@ -234,6 +264,9 @@ static void g_reset(void) {
   G.sx = G.sy = 0;
   G.level_pop = 0;
   G.pause_cd  = 0;
+  G.trail_f   = 256;
+  G.zen_miss  = false;
+  G.z_spam    = 0;
   G.pop_t     = 0;
   G.shine_t   = 0;
 }
@@ -246,38 +279,56 @@ static void g_start(void) {
   G.tol     = (G.mode == MODE_HARDCORE) ? (TOL_INIT * 4 / 5) : TOL_INIT;
   G.cw      = true;
   G.new_hs  = false;
+  G.zen_miss = false;
+  G.z_spam    = 0;
   G.flash   = 0;
   G.shake   = 0;
   G.sx = G.sy = 0;
   G.p_on    = false;
   G.level_pop = 0;
   G.pause_cd  = 0;
+  G.trail_f   = 256;
   G.pop_t   = 0;
   G.shine_t = 0;
+  G.travel  = 0;
   G.target  = (int32_t)(rand() % TRIG_MAX_ANGLE);
 }
 
 static void g_next(void) {
-  if (G.mode == MODE_HARDCORE) {
-    if (G.level > G.hhs) {
-      G.hhs = G.level;
-      G.new_hs = true;
-      persist_write_int(PK_HHS, G.hhs);
+  if (G.mode == MODE_ZEN && G.zen_miss) {
+    /* missed in Zen: don't increment level or difficulty */
+  } else {
+    if (G.mode == MODE_HARDCORE) {
+      if (G.level > G.hhs) {
+        G.hhs = G.level;
+        G.new_hs = true;
+        persist_write_int(PK_HHS, G.hhs);
+      }
+    } else if (G.mode == MODE_CLASSIC) {
+      if (G.level > G.hs) {
+        G.hs = G.level;
+        G.new_hs = true;
+        persist_write_int(PK_HS, G.hs);
+      }
     }
-  } else if (G.mode == MODE_CLASSIC) {
-    if (G.level > G.hs) {
-      G.hs = G.level;
-      G.new_hs = true;
-      persist_write_int(PK_HS, G.hs);
-    }
+    G.level++;
+    int inc = (G.mode == MODE_HARDCORE) ? (SPD_INC * 3 / 2)
+            : (G.mode == MODE_ZEN)      ? (SPD_INC / 2)
+            :                             SPD_INC;
+    G.spd += inc;
+    if (G.spd > SPD_MAX) G.spd = SPD_MAX;
+
+    int dec = (G.mode == MODE_HARDCORE) ? (TOL_DEC * 6 / 5)
+            : (G.mode == MODE_ZEN)      ? (TOL_DEC / 2)
+            :                             TOL_DEC;
+    G.tol -= dec;
+    if (G.tol < TOL_MIN) G.tol = TOL_MIN;
   }
-  G.level++;
-  G.spd += (G.mode == MODE_HARDCORE) ? (SPD_INC * 3 / 2) : SPD_INC;
-  if (G.spd > SPD_MAX) G.spd = SPD_MAX;
-  G.tol -= (G.mode == MODE_HARDCORE) ? (TOL_DEC * 6 / 5) : TOL_DEC;
-  if (G.tol < TOL_MIN) G.tol = TOL_MIN;
+
   G.cw      = !G.cw;
+  G.trail_f = 0;
   G.level_pop = 12;
+  G.travel  = 0;
   G.target  = (int32_t)(rand() % TRIG_MAX_ANGLE);
 }
 
@@ -293,6 +344,9 @@ static void g_select(void) {
     /* ── HIT ── */
     G.st      = ST_SUCCESS;
     G.flash   = FLASH_DUR;
+    G.zen_miss = false;
+    G.z_spam    = 0;
+    G.shake   = 6;                  /* small satisfying hit shake */
     G.pop_r   = RING_RADIUS;        /* start expanding ring pulse */
     G.pop_t   = POP_FRAMES;
     G.shine_t = SHINE_FRAMES;       /* ring briefly turns gold    */
@@ -304,14 +358,28 @@ static void g_select(void) {
     GRect bnd = layer_get_bounds(s_cvs);
     GPoint ip = ring_pt(G.angle, bnd.size.w/2 + G.sx, bnd.size.h/2 + G.sy);
     parts_emit(ip.x, ip.y);
-    vibes_short_pulse();
+    static const uint32_t segments[] = { 30, 20, 30 };
+    VibePattern pat = { .durations = segments, .num_segments = 3 };
+    vibes_enqueue_custom_pattern(pat);
     light_enable_interaction();
   } else {
     /* ── MISS ── */
     if (G.mode == MODE_ZEN) {
+      /* Anti-spam: check if spamming same area */
+      if (ang_dist(G.angle, G.z_last_ang) < TRIG_MAX_ANGLE / 24) {
+        if (++G.z_spam > 3) {
+          /* Spam detected -> Fail */
+          goto zen_fail;
+        }
+      } else {
+        G.z_last_ang = G.angle;
+        G.z_spam     = 1;
+      }
+
       /* Zen mode: forgive the miss, keep going */
       G.st    = ST_SUCCESS;
       G.flash = FLASH_DUR;
+      G.zen_miss = true;
       G.pop_r = RING_RADIUS;
       G.pop_t = POP_FRAMES / 2;
 #ifdef PBL_COLOR
@@ -322,6 +390,7 @@ static void g_select(void) {
       vibes_double_pulse();
       return;
     }
+    zen_fail:
     G.st    = ST_FAIL;
     G.flash = FLASH_DUR * 2;
     G.shake = SHAKE_DUR;
@@ -353,22 +422,25 @@ static void draw_lock(GContext *ctx, GPoint p, bool open, GColor col) {
   graphics_context_set_stroke_width(ctx, 1);
   /* body */
   graphics_context_set_fill_color(ctx, GColorBlack);
-  graphics_fill_rect(ctx, GRect(p.x-3, p.y, 7, 5), 1, GCornersAll);
-  graphics_draw_round_rect(ctx, GRect(p.x-3, p.y, 7, 5), 1);
+  graphics_fill_rect(ctx, GRect(p.x-4, p.y, 9, 7), 1, GCornersAll);
+  graphics_draw_round_rect(ctx, GRect(p.x-4, p.y, 9, 7), 1);
   /* shackle */
   if (!open) {
     /* closed: U sits flush on body */
-    graphics_draw_line(ctx, GPoint(p.x-2, p.y),   GPoint(p.x-2, p.y-4));
-    graphics_draw_line(ctx, GPoint(p.x+3, p.y),   GPoint(p.x+3, p.y-4));
-    graphics_draw_line(ctx, GPoint(p.x-2, p.y-4), GPoint(p.x+3, p.y-4));
+    graphics_draw_line(ctx, GPoint(p.x-2, p.y),   GPoint(p.x-2, p.y-5));
+    graphics_draw_line(ctx, GPoint(p.x+3, p.y),   GPoint(p.x+3, p.y-5));
+    graphics_draw_arc(ctx, GRect(p.x-2, p.y-7, 6, 6), GOvalScaleModeFitCircle,
+                      TRIG_MAX_ANGLE * 3 / 4, TRIG_MAX_ANGLE * 5 / 4);
   } else {
-    /* open: right leg swings out */
-    graphics_draw_line(ctx, GPoint(p.x-2, p.y),   GPoint(p.x-2, p.y-3));
-    graphics_draw_line(ctx, GPoint(p.x+3, p.y),   GPoint(p.x+8, p.y-5));
-    graphics_draw_line(ctx, GPoint(p.x-2, p.y-3), GPoint(p.x+4, p.y-7));
+    /* open: shackle raised and rotated slightly */
+    graphics_draw_line(ctx, GPoint(p.x-2, p.y-2),   GPoint(p.x-2, p.y-7));
+    graphics_draw_arc(ctx, GRect(p.x-2, p.y-9, 6, 6), GOvalScaleModeFitCircle,
+                      TRIG_MAX_ANGLE * 3 / 4, TRIG_MAX_ANGLE * 5 / 4);
+    graphics_draw_line(ctx, GPoint(p.x+4, p.y-7),   GPoint(p.x+6, p.y-4));
   }
   /* keyhole */
   graphics_context_set_fill_color(ctx, col);
+  graphics_fill_rect(ctx, GRect(p.x, p.y+2, 2, 3), 0, GCornerNone);
   graphics_fill_circle(ctx, GPoint(p.x+1, p.y+2), 1);
 }
 
@@ -376,6 +448,7 @@ static void draw_lock(GContext *ctx, GPoint p, bool open, GColor col) {
  *  Drawing
  * ══════════════════════════════════════════════════════════════════ */
 static void draw_cb(Layer *layer, GContext *ctx) {
+  graphics_context_set_antialiased(ctx, true);
   GRect b  = layer_get_bounds(layer);
   int W    = b.size.w;
   int H    = b.size.h;
@@ -390,16 +463,14 @@ static void draw_cb(Layer *layer, GContext *ctx) {
   /* ── starfield ── */
   stars_draw(ctx, W, H);
 
+
   /* ── radial speed lines (gameplay only) ── */
+#ifdef PBL_COLOR
   if (G.st == ST_PLAYING || G.st == ST_PAUSED) {
     int32_t step   = TRIG_MAX_ANGLE / 8;
     int32_t offset = ang_wrap((int32_t)G.frame * G.spd / 400);
     graphics_context_set_stroke_width(ctx, 1);
-#ifdef PBL_COLOR
     graphics_context_set_stroke_color(ctx, GColorDarkGray);
-#else
-    graphics_context_set_stroke_color(ctx, GColorDarkGray);
-#endif
     for (int i = 0; i < 8; i++) {
       int32_t a = ang_wrap(offset + i * step);
       graphics_draw_line(ctx,
@@ -407,18 +478,12 @@ static void draw_cb(Layer *layer, GContext *ctx) {
         radius_pt(a, cx, cy, R + 38));
     }
   }
+#endif
 
   /* ════════════════════════════════════════════════════════════
    *  TITLE SCREEN
    * ════════════════════════════════════════════════════════════ */
   if (G.st == ST_TITLE) {
-    /* outer halos */
-#ifdef PBL_COLOR
-    graphics_context_set_stroke_color(ctx, GColorDarkGray);
-    graphics_context_set_stroke_width(ctx, 1);
-    graphics_draw_circle(ctx, GPoint(cx, cy), R + 9);
-    graphics_draw_circle(ctx, GPoint(cx, cy), R + 5);
-#endif
     /* main ring */
     graphics_context_set_stroke_color(ctx, GColorLightGray);
     graphics_context_set_stroke_width(ctx, RING_THICK);
@@ -446,43 +511,59 @@ static void draw_cb(Layer *layer, GContext *ctx) {
 #endif
     graphics_fill_circle(ctx, ip, IND_R);
 
+    /* mode-specific color */
+    GColor mode_col = GColorIcterine;
+#ifdef PBL_COLOR
+    if (G.mode == MODE_HARDCORE) mode_col = GColorImperialPurple;
+    if (G.mode == MODE_ZEN)      mode_col = GColorMediumSpringGreen;
+#endif
+
     /* title */
-    GFont tf = fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD);
+    GFont tf = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
     GFont sf = fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD);
 #ifdef PBL_ROUND
-    int ty = cy - 64;
+    int ty = cy - 66;
 #else
-    int ty = cy - 78;
+    int ty = cy - 80;
 #endif
 #ifdef PBL_COLOR
-    graphics_context_set_text_color(ctx, GColorChromeYellow);
+    graphics_context_set_text_color(ctx, mode_col);
 #else
     graphics_context_set_text_color(ctx, GColorWhite);
 #endif
-    graphics_draw_text(ctx, "UNLOCK", tf, GRect(cx-50, ty, 100, 22),
+    graphics_draw_text(ctx, "UNLOCK", tf, GRect(cx-70, ty, 140, 30),
       GTextOverflowModeFill, GTextAlignmentCenter, NULL);
     graphics_context_set_text_color(ctx, GColorWhite);
-    graphics_draw_text(ctx, "THE PLOCK", tf, GRect(cx-56, ty+21, 112, 22),
+    graphics_draw_text(ctx, "THE PLOCK", tf, GRect(cx-80, ty+26, 160, 30),
       GTextOverflowModeFill, GTextAlignmentCenter, NULL);
 
     /* pulsing instruction */
     if ((G.frame % 50) < 38) {
       GFont ifont = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
+#ifdef PBL_COLOR
+      graphics_context_set_text_color(ctx, GColorElectricBlue);
+#else
       graphics_context_set_text_color(ctx, GColorWhite);
+#endif
       graphics_draw_text(ctx, "PRESS SELECT", ifont,
-        GRect(cx-70, cy-18, 140, 30),
+        GRect(cx-70, cy-14, 140, 30),
         GTextOverflowModeFill, GTextAlignmentCenter, NULL);
     }
 
     /* mode label + nav hint */
     const char *modes[] = {"CLASSIC", "HARDCORE", "ZEN"};
+
+    /* Selection highlight bar */
+    graphics_context_set_fill_color(ctx, GColorDarkGray);
+    graphics_fill_rect(ctx, GRect(cx-40, cy+29, 80, 15), 2, GCornersAll);
+
 #ifdef PBL_COLOR
-    graphics_context_set_text_color(ctx, GColorChromeYellow);
+    graphics_context_set_text_color(ctx, mode_col);
 #else
-    graphics_context_set_text_color(ctx, GColorWhite);
+    graphics_context_set_text_color(ctx, GColorBlack);
 #endif
     graphics_draw_text(ctx, modes[G.mode], sf,
-      GRect(cx-50, cy+22, 100, 18),
+      GRect(cx-50, cy+27, 100, 18),
       GTextOverflowModeFill, GTextAlignmentCenter, NULL);
 
     /* best score */
@@ -493,7 +574,7 @@ static void draw_cb(Layer *layer, GContext *ctx) {
       else        snprintf(hsbuf, sizeof(hsbuf), "BEST: --");
       graphics_context_set_text_color(ctx, GColorLightGray);
       graphics_draw_text(ctx, hsbuf, sf,
-        GRect(cx-40, cy+40, 80, 18),
+        GRect(cx-40, cy+46, 80, 18),
         GTextOverflowModeFill, GTextAlignmentCenter, NULL);
     }
     return;
@@ -597,9 +678,11 @@ static void draw_cb(Layer *layer, GContext *ctx) {
 #ifdef PBL_COLOR
   {
     int dir = G.cw ? 1 : -1;
+    /* smooth interpolation for trail direction change */
+    int32_t flip_off = (256 - G.trail_f) * (TRIG_MAX_ANGLE / 24) >> 8;
     static const int tsz[TRAIL_LEN] = {4,4,4,3,2};
     for (int t = TRAIL_LEN; t >= 1; t--) {
-      int32_t ta  = ang_wrap(ind - dir * t * (TRIG_MAX_ANGLE / 46));
+      int32_t ta  = ang_wrap(ind - dir * t * (TRIG_MAX_ANGLE / 46) + (dir * flip_off));
       GPoint  tp2 = ring_pt(ta, cx, cy);
       GColor tc;
       switch (t) {
@@ -669,20 +752,22 @@ static void draw_cb(Layer *layer, GContext *ctx) {
 #endif
 
   /* ── centre HUD ── */
-  GFont bf = fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD);
+  GFont bf = fonts_get_system_font(FONT_KEY_LECO_42_NUMBERS);
+  GFont af = fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD);
   GFont tf = fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD);
   static char lvl_buf[8];
   snprintf(lvl_buf, sizeof(lvl_buf), "%d", G.level);
 
-  graphics_context_set_text_color(ctx, GColorDarkGray);
-  graphics_draw_text(ctx, "LEVEL", tf,
-    GRect(cx-30, cy-50, 60, 18),
-    GTextOverflowModeFill, GTextAlignmentCenter, NULL);
 
   int ty_off = G.level_pop;
   graphics_context_set_text_color(ctx, nc);
+#ifdef PBL_ROUND
+  int level_val_y = cy - 28;
+#else
+  int level_val_y = cy - 32;
+#endif
   graphics_draw_text(ctx, lvl_buf, bf,
-    GRect(cx-50, cy-32-ty_off/2, 100, 64+ty_off),
+    GRect(cx-50, level_val_y-ty_off/2, 100, 64+ty_off),
     GTextOverflowModeFill, GTextAlignmentCenter, NULL);
 
   graphics_context_set_text_color(ctx, GColorLightGray);
@@ -692,18 +777,24 @@ static void draw_cb(Layer *layer, GContext *ctx) {
 
   /* ── paused overlay ── */
   if (G.st == ST_PAUSED) {
-    graphics_context_set_fill_color(ctx, GColorBlack);
-    graphics_fill_rect(ctx, GRect(cx-62, cy-22, 124, 44), 4, GCornersAll);
-    graphics_context_set_text_color(ctx, GColorWhite);
+    /* Full-width inverted band */
+    graphics_context_set_fill_color(ctx, GColorWhite);
+    graphics_fill_rect(ctx, GRect(0, cy-32, W, 64), 0, GCornerNone);
+
+    graphics_context_set_text_color(ctx, GColorBlack);
     if (G.pause_cd > 0) {
       static char cdbuf[16];
-      snprintf(cdbuf, sizeof(cdbuf), "WAIT %d", G.pause_cd / 30 + 1);
+      snprintf(cdbuf, sizeof(cdbuf), "%d", G.pause_cd / 30 + 1);
       graphics_draw_text(ctx, cdbuf, bf,
-        GRect(cx-50, cy-32, 100, 64),
+        GRect(cx-50, cy-28, 100, 64),
         GTextOverflowModeFill, GTextAlignmentCenter, NULL);
     } else {
-      graphics_draw_text(ctx, "PAUSED", bf,
-        GRect(cx-50, cy-32, 100, 64),
+      graphics_draw_text(ctx, "PAUSED", af,
+        GRect(cx-50, cy-20, 100, 32),
+        GTextOverflowModeFill, GTextAlignmentCenter, NULL);
+
+      graphics_draw_text(ctx, "back to resume", tf,
+        GRect(cx-60, cy+14, 120, 18),
         GTextOverflowModeFill, GTextAlignmentCenter, NULL);
     }
   }
@@ -764,6 +855,10 @@ static void tick(void *unused) {
   /* level-pop bounce decay */
   if (G.level_pop > 0) G.level_pop--;
 
+  /* trail flip interpolation */
+  if (G.trail_f < 256) G.trail_f += 32;
+  if (G.trail_f > 256) G.trail_f = 256;
+
   /* pause cooldown */
   if (G.pause_cd > 0) G.pause_cd--;
 
@@ -777,6 +872,19 @@ static void tick(void *unused) {
 
     case ST_PLAYING:
       G.angle = ang_wrap(G.angle + (G.cw ? G.spd : -G.spd));
+      G.travel += G.spd;
+      if (G.mode != MODE_ZEN && G.travel > TRIG_MAX_ANGLE * 2) {
+        /* Failed to hit target within 2 full loops */
+        G.st    = ST_FAIL;
+        G.flash = FLASH_DUR * 2;
+        G.shake = SHAKE_DUR;
+#ifdef PBL_COLOR
+        G.fcol = GColorRed;
+#else
+        G.fcol = GColorWhite;
+#endif
+        vibes_double_pulse();
+      }
       break;
 
     case ST_SUCCESS:
