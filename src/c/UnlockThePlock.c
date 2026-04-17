@@ -149,8 +149,8 @@ static void parts_emit(int cx, int cy) {
     G.p[i].y       = cy * 256;
     G.p[i].vx      = sin_lookup(a) * spd >> 7;
     G.p[i].vy      = -(cos_lookup(a) * spd >> 7);
-    G.p[i].life    = 22 + (rand() % 14);
-    G.p[i].maxlife = 36;
+    G.p[i].life    = 44 + (rand() % 28);
+    G.p[i].maxlife = 72;
     G.p[i].sz      = 2 + (rand() % 4);
     G.p[i].col     = pcolor(i);
   }
@@ -168,11 +168,11 @@ static void parts_update(void) {
 
     /* fade out color if possible */
 #ifdef PBL_COLOR
-    if (G.p[i].life < 12) {
+    if (G.p[i].life < 24) {
       // Shift towards black/darker shades as they die
-      if (G.p[i].life < 4) G.p[i].col = GColorBlack;
-      else if (G.p[i].life < 8) G.p[i].col = GColorDarkGray;
-      else if (G.p[i].life < 12) G.p[i].col = GColorLightGray;
+      if (G.p[i].life < 8) G.p[i].col = GColorBlack;
+      else if (G.p[i].life < 16) G.p[i].col = GColorDarkGray;
+      else if (G.p[i].life < 24) G.p[i].col = GColorLightGray;
     }
 #endif
     any = true;
@@ -417,14 +417,6 @@ static void draw_cb(Layer *layer, GContext *ctx) {
   /* ── starfield ── */
   stars_draw(ctx, W, H);
 
-  /* ── subtle vignette ── */
-#ifdef PBL_COLOR
-  graphics_context_set_stroke_width(ctx, 1);
-  for (int i = 0; i < 5; i++) {
-    graphics_context_set_stroke_color(ctx, GColorFromRGBA(0, 0, 0, 200 - i * 40));
-    graphics_draw_rect(ctx, GRect(i, i, W - i * 2, H - i * 2));
-  }
-#endif
 
   /* ── radial speed lines (gameplay only) ── */
 #ifdef PBL_COLOR
@@ -446,16 +438,6 @@ static void draw_cb(Layer *layer, GContext *ctx) {
    *  TITLE SCREEN
    * ════════════════════════════════════════════════════════════ */
   if (G.st == ST_TITLE) {
-    /* breathing effect */
-    int breath = sin_lookup(G.frame * 500) * 4 / TRIG_MAX_RATIO;
-
-    /* outer halos */
-#ifdef PBL_COLOR
-    graphics_context_set_stroke_color(ctx, GColorDarkGray);
-    graphics_context_set_stroke_width(ctx, 1);
-    graphics_draw_circle(ctx, GPoint(cx, cy), R + 9 + breath);
-    graphics_draw_circle(ctx, GPoint(cx, cy), R + 5 + breath / 2);
-#endif
     /* main ring */
     graphics_context_set_stroke_color(ctx, GColorLightGray);
     graphics_context_set_stroke_width(ctx, RING_THICK);
@@ -487,19 +469,19 @@ static void draw_cb(Layer *layer, GContext *ctx) {
     GFont tf = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
     GFont sf = fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD);
 #ifdef PBL_ROUND
-    int ty = cy - 70;
+    int ty = cy - 74;
 #else
-    int ty = cy - 84;
+    int ty = cy - 88;
 #endif
 #ifdef PBL_COLOR
-    graphics_context_set_text_color(ctx, GColorChromeYellow);
+    graphics_context_set_text_color(ctx, GColorIcterine);
 #else
     graphics_context_set_text_color(ctx, GColorWhite);
 #endif
-    graphics_draw_text(ctx, "UNLOCK", tf, GRect(cx-60, ty, 120, 28),
+    graphics_draw_text(ctx, "UNLOCK", tf, GRect(cx-70, ty, 140, 30),
       GTextOverflowModeFill, GTextAlignmentCenter, NULL);
     graphics_context_set_text_color(ctx, GColorWhite);
-    graphics_draw_text(ctx, "THE PLOCK", tf, GRect(cx-70, ty+24, 140, 28),
+    graphics_draw_text(ctx, "THE PLOCK", tf, GRect(cx-80, ty+26, 160, 30),
       GTextOverflowModeFill, GTextAlignmentCenter, NULL);
 
     /* pulsing instruction */
