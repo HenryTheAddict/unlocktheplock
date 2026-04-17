@@ -1,0 +1,33 @@
+{
+    "displayName": "UnlockThePlock",
+    "uuid": "9a2157cc-395b-4d0e-952b-8ec6bcb78bb1",
+    "sdkVersion": "3",
+    "enableMultiJS": true,
+    "targetPlatforms": [
+        "aplite",
+        "basalt",
+        "chalk",
+        "diorite",
+        "emery",
+        "flint",
+        "gabbro"
+    ],
+    "watchapp": {
+        "watchface": false
+    },
+    "messageKeys": {
+        "dummy": 10000
+    },
+    "resources": {
+        "media": []
+    },
+    "name": "UnlockThePlock",
+    "shortName": "UnlockThePlock",
+    "longName": "UnlockThePlock",
+    "versionLabel": "1.0",
+    "companyName": "MakeAwesomeHappen",
+    "appKeys": {
+        "dummy": 10000
+    },
+    "capabilities": []
+}
