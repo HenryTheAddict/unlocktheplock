@@ -522,13 +522,18 @@ static void draw_cb(Layer *layer, GContext *ctx) {
 
     /* mode label + nav hint */
     const char *modes[] = {"CLASSIC", "HARDCORE", "ZEN"};
+
+    /* Selection highlight bar */
+    graphics_context_set_fill_color(ctx, GColorDarkGray);
+    graphics_fill_rect(ctx, GRect(cx-40, cy+29, 80, 15), 2, GCornersAll);
+
 #ifdef PBL_COLOR
-    graphics_context_set_text_color(ctx, GColorChromeYellow);
+    graphics_context_set_text_color(ctx, GColorIcterine);
 #else
-    graphics_context_set_text_color(ctx, GColorWhite);
+    graphics_context_set_text_color(ctx, GColorBlack);
 #endif
     graphics_draw_text(ctx, modes[G.mode], sf,
-      GRect(cx-50, cy+28, 100, 18),
+      GRect(cx-50, cy+27, 100, 18),
       GTextOverflowModeFill, GTextAlignmentCenter, NULL);
 
     /* best score */
@@ -720,15 +725,6 @@ static void draw_cb(Layer *layer, GContext *ctx) {
   static char lvl_buf[8];
   snprintf(lvl_buf, sizeof(lvl_buf), "%d", G.level);
 
-  graphics_context_set_text_color(ctx, GColorDarkGray);
-#ifdef PBL_ROUND
-  int level_label_y = cy - 50;
-#else
-  int level_label_y = cy - 54;
-#endif
-  graphics_draw_text(ctx, "LEVEL", tf,
-    GRect(cx-30, level_label_y, 60, 18),
-    GTextOverflowModeFill, GTextAlignmentCenter, NULL);
 
   int ty_off = G.level_pop;
   graphics_context_set_text_color(ctx, nc);
@@ -748,18 +744,24 @@ static void draw_cb(Layer *layer, GContext *ctx) {
 
   /* ── paused overlay ── */
   if (G.st == ST_PAUSED) {
-    graphics_context_set_fill_color(ctx, GColorBlack);
-    graphics_fill_rect(ctx, GRect(cx-62, cy-22, 124, 44), 4, GCornersAll);
-    graphics_context_set_text_color(ctx, GColorWhite);
+    /* Full-width inverted band */
+    graphics_context_set_fill_color(ctx, GColorWhite);
+    graphics_fill_rect(ctx, GRect(0, cy-32, W, 64), 0, GCornerNone);
+
+    graphics_context_set_text_color(ctx, GColorBlack);
     if (G.pause_cd > 0) {
       static char cdbuf[16];
-      snprintf(cdbuf, sizeof(cdbuf), "WAIT %d", G.pause_cd / 30 + 1);
+      snprintf(cdbuf, sizeof(cdbuf), "%d", G.pause_cd / 30 + 1);
       graphics_draw_text(ctx, cdbuf, bf,
-        GRect(cx-50, cy-32, 100, 64),
+        GRect(cx-50, cy-28, 100, 64),
         GTextOverflowModeFill, GTextAlignmentCenter, NULL);
     } else {
       graphics_draw_text(ctx, "PAUSED", bf,
-        GRect(cx-50, cy-32, 100, 64),
+        GRect(cx-50, cy-28, 100, 64),
+        GTextOverflowModeFill, GTextAlignmentCenter, NULL);
+
+      graphics_draw_text(ctx, "back to resume", tf,
+        GRect(cx-60, cy+14, 120, 18),
         GTextOverflowModeFill, GTextAlignmentCenter, NULL);
     }
   }
