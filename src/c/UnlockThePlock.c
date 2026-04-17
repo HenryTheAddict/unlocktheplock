@@ -162,8 +162,15 @@ static void parts_update(void) {
     if (G.p[i].life <= 0) continue;
     G.p[i].x  += G.p[i].vx;
     G.p[i].y  += G.p[i].vy;
-    G.p[i].vy += 20; /* gravity */
+    G.p[i].vy += 15; /* gravity reduced slightly for "floatier" feel */
     G.p[i].life--;
+
+    /* fade out color if possible */
+#ifdef PBL_COLOR
+    if (G.p[i].life < 8) {
+       if (G.p[i].life % 2 == 0) G.p[i].col = GColorDarkGray;
+    }
+#endif
     any = true;
   }
   G.p_on = any;
@@ -353,22 +360,25 @@ static void draw_lock(GContext *ctx, GPoint p, bool open, GColor col) {
   graphics_context_set_stroke_width(ctx, 1);
   /* body */
   graphics_context_set_fill_color(ctx, GColorBlack);
-  graphics_fill_rect(ctx, GRect(p.x-3, p.y, 7, 5), 1, GCornersAll);
-  graphics_draw_round_rect(ctx, GRect(p.x-3, p.y, 7, 5), 1);
+  graphics_fill_rect(ctx, GRect(p.x-4, p.y, 9, 7), 1, GCornersAll);
+  graphics_draw_round_rect(ctx, GRect(p.x-4, p.y, 9, 7), 1);
   /* shackle */
   if (!open) {
     /* closed: U sits flush on body */
-    graphics_draw_line(ctx, GPoint(p.x-2, p.y),   GPoint(p.x-2, p.y-4));
-    graphics_draw_line(ctx, GPoint(p.x+3, p.y),   GPoint(p.x+3, p.y-4));
-    graphics_draw_line(ctx, GPoint(p.x-2, p.y-4), GPoint(p.x+3, p.y-4));
+    graphics_draw_line(ctx, GPoint(p.x-2, p.y),   GPoint(p.x-2, p.y-5));
+    graphics_draw_line(ctx, GPoint(p.x+3, p.y),   GPoint(p.x+3, p.y-5));
+    graphics_draw_arc(ctx, GRect(p.x-2, p.y-7, 6, 6), GOvalScaleModeFitCircle,
+                      TRIG_MAX_ANGLE * 3 / 4, TRIG_MAX_ANGLE * 5 / 4);
   } else {
-    /* open: right leg swings out */
-    graphics_draw_line(ctx, GPoint(p.x-2, p.y),   GPoint(p.x-2, p.y-3));
-    graphics_draw_line(ctx, GPoint(p.x+3, p.y),   GPoint(p.x+8, p.y-5));
-    graphics_draw_line(ctx, GPoint(p.x-2, p.y-3), GPoint(p.x+4, p.y-7));
+    /* open: shackle raised and rotated slightly */
+    graphics_draw_line(ctx, GPoint(p.x-2, p.y-2),   GPoint(p.x-2, p.y-7));
+    graphics_draw_arc(ctx, GRect(p.x-2, p.y-9, 6, 6), GOvalScaleModeFitCircle,
+                      TRIG_MAX_ANGLE * 3 / 4, TRIG_MAX_ANGLE * 5 / 4);
+    graphics_draw_line(ctx, GPoint(p.x+4, p.y-7),   GPoint(p.x+6, p.y-4));
   }
   /* keyhole */
   graphics_context_set_fill_color(ctx, col);
+  graphics_fill_rect(ctx, GRect(p.x, p.y+2, 2, 3), 0, GCornerNone);
   graphics_fill_circle(ctx, GPoint(p.x+1, p.y+2), 1);
 }
 
@@ -376,6 +386,7 @@ static void draw_lock(GContext *ctx, GPoint p, bool open, GColor col) {
  *  Drawing
  * ══════════════════════════════════════════════════════════════════ */
 static void draw_cb(Layer *layer, GContext *ctx) {
+  graphics_context_set_antialiased(ctx, true);
   GRect b  = layer_get_bounds(layer);
   int W    = b.size.w;
   int H    = b.size.h;
@@ -389,6 +400,15 @@ static void draw_cb(Layer *layer, GContext *ctx) {
 
   /* ── starfield ── */
   stars_draw(ctx, W, H);
+
+  /* ── subtle vignette ── */
+#ifdef PBL_COLOR
+  graphics_context_set_stroke_width(ctx, 1);
+  for (int i = 0; i < 5; i++) {
+    graphics_context_set_stroke_color(ctx, GColorFromRGBA(0, 0, 0, 200 - i * 40));
+    graphics_draw_rect(ctx, GRect(i, i, W - i * 2, H - i * 2));
+  }
+#endif
 
   /* ── radial speed lines (gameplay only) ── */
   if (G.st == ST_PLAYING || G.st == ST_PAUSED) {
@@ -412,12 +432,15 @@ static void draw_cb(Layer *layer, GContext *ctx) {
    *  TITLE SCREEN
    * ════════════════════════════════════════════════════════════ */
   if (G.st == ST_TITLE) {
+    /* breathing effect */
+    int breath = sin_lookup(G.frame * 500) * 4 / TRIG_MAX_RATIO;
+
     /* outer halos */
 #ifdef PBL_COLOR
     graphics_context_set_stroke_color(ctx, GColorDarkGray);
     graphics_context_set_stroke_width(ctx, 1);
-    graphics_draw_circle(ctx, GPoint(cx, cy), R + 9);
-    graphics_draw_circle(ctx, GPoint(cx, cy), R + 5);
+    graphics_draw_circle(ctx, GPoint(cx, cy), R + 9 + breath);
+    graphics_draw_circle(ctx, GPoint(cx, cy), R + 5 + breath / 2);
 #endif
     /* main ring */
     graphics_context_set_stroke_color(ctx, GColorLightGray);
@@ -468,7 +491,11 @@ static void draw_cb(Layer *layer, GContext *ctx) {
     /* pulsing instruction */
     if ((G.frame % 50) < 38) {
       GFont ifont = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
+#ifdef PBL_COLOR
+      graphics_context_set_text_color(ctx, GColorElectricBlue);
+#else
       graphics_context_set_text_color(ctx, GColorWhite);
+#endif
       graphics_draw_text(ctx, "PRESS SELECT", ifont,
         GRect(cx-70, cy-18, 140, 30),
         GTextOverflowModeFill, GTextAlignmentCenter, NULL);
@@ -669,20 +696,30 @@ static void draw_cb(Layer *layer, GContext *ctx) {
 #endif
 
   /* ── centre HUD ── */
-  GFont bf = fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD);
+  GFont bf = fonts_get_system_font(FONT_KEY_LECO_42_NUMBERS);
   GFont tf = fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD);
   static char lvl_buf[8];
   snprintf(lvl_buf, sizeof(lvl_buf), "%d", G.level);
 
   graphics_context_set_text_color(ctx, GColorDarkGray);
+#ifdef PBL_ROUND
+  int level_label_y = cy - 50;
+#else
+  int level_label_y = cy - 54;
+#endif
   graphics_draw_text(ctx, "LEVEL", tf,
-    GRect(cx-30, cy-50, 60, 18),
+    GRect(cx-30, level_label_y, 60, 18),
     GTextOverflowModeFill, GTextAlignmentCenter, NULL);
 
   int ty_off = G.level_pop;
   graphics_context_set_text_color(ctx, nc);
+#ifdef PBL_ROUND
+  int level_val_y = cy - 28;
+#else
+  int level_val_y = cy - 32;
+#endif
   graphics_draw_text(ctx, lvl_buf, bf,
-    GRect(cx-50, cy-32-ty_off/2, 100, 64+ty_off),
+    GRect(cx-50, level_val_y-ty_off/2, 100, 64+ty_off),
     GTextOverflowModeFill, GTextAlignmentCenter, NULL);
 
   graphics_context_set_text_color(ctx, GColorLightGray);
