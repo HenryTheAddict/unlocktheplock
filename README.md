@@ -47,4 +47,4 @@ pebble screenshot screenshot.png
 
 ## Credits
 
-Developed by MakeAwesomeHappen.
+Developed by h3nry.
