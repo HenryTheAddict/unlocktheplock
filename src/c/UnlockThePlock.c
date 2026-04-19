@@ -26,21 +26,28 @@
 #define PK_SCHEMA  99
 #define PK_HS       0
 #define PK_HHS      1
-#define SCHEMA_V    2
+#define PK_ZHS      2
+#define SCHEMA_V    3
 
 /* ══════════════════════════════════════════════════════════════════
  *  Gameplay tuning
  * ══════════════════════════════════════════════════════════════════ */
-#define SPD_INIT    320
-#define SPD_INC      60
+#define SPD_INIT    280
+#define SPD_INC      40
 #define SPD_MAX    3000
-#define TOL_INIT   3600   /* ~20° window to start       */
-#define TOL_MIN    1000   /* ~5.5° window at max diff   */
-#define TOL_DEC      85
+#define TOL_INIT   5000   /* ~28° window to start       */
+#define TOL_MIN    1600   /* ~9° window at max diff     */
+#define TOL_DEC      55
+#define MILESTONE_FRAMES 55  /* level milestone banner duration */
 #define FLASH_DUR    12
 #define SHAKE_DUR    16
-#define NPARTS       36
-#define NSTARS       40
+#if defined(PBL_PLATFORM_APLITE) || defined(PBL_PLATFORM_DIORITE)
+  #define NPARTS       18
+  #define NSTARS       20
+#else
+  #define NPARTS       36
+  #define NSTARS       40
+#endif
 #define PAUSE_CD     60   /* ~2 s at 30 fps             */
 #define POP_FRAMES   24   /* ring-pulse animation len   */
 #define POP_SPEED     5   /* px/frame ring expansion    */
@@ -73,6 +80,7 @@ typedef struct {
   int     level;
   int     hs;        /* classic high score               */
   int     hhs;       /* hardcore high score              */
+  int     zhs;       /* zen high score                   */
   bool    new_hs;
   bool    zen_miss;  /* missed in zen mode?              */
   int32_t z_last_ang;/* last miss angle (zen anti-spam)  */
@@ -89,6 +97,8 @@ typedef struct {
   int     pop_t;     /* expanding ring countdown         */
   int     shine_t;   /* ring gold-flash countdown        */
   int     level_pop; /* level-number bounce countdown    */
+  int     milestone_t;   /* milestone banner countdown   */
+  int     milestone_lvl; /* which milestone triggered    */
   int     pause_cd;
   int32_t title_ang;
   int32_t travel;    /* distance traveled in current turn */
@@ -265,33 +275,40 @@ static void g_reset(void) {
   G.level_pop = 0;
   G.pause_cd  = 0;
   G.trail_f   = 256;
-  G.zen_miss  = false;
-  G.z_spam    = 0;
-  G.pop_t     = 0;
-  G.shine_t   = 0;
+  G.zen_miss    = false;
+  G.z_spam      = 0;
+  G.pop_t       = 0;
+  G.shine_t     = 0;
+  G.milestone_t   = 0;
+  G.milestone_lvl = 0;
 }
 
 static void g_start(void) {
   G.st      = ST_PLAYING;
+  vibes_short_pulse();
   G.level   = 1;
   G.angle   = 0;
   G.spd     = (G.mode == MODE_HARDCORE) ? (SPD_INIT * 3 / 2) : SPD_INIT;
-  G.tol     = (G.mode == MODE_HARDCORE) ? (TOL_INIT * 4 / 5) : TOL_INIT;
+  G.tol     = (G.mode == MODE_HARDCORE) ? (TOL_INIT * 4 / 5)
+            : (G.mode == MODE_ZEN)      ? (TOL_INIT * 6 / 5)
+            :                             TOL_INIT;
   G.cw      = true;
   G.new_hs  = false;
-  G.zen_miss = false;
-  G.z_spam    = 0;
-  G.flash   = 0;
-  G.shake   = 0;
-  G.sx = G.sy = 0;
-  G.p_on    = false;
-  G.level_pop = 0;
-  G.pause_cd  = 0;
-  G.trail_f   = 256;
-  G.pop_t   = 0;
-  G.shine_t = 0;
-  G.travel  = 0;
-  G.target  = (int32_t)(rand() % TRIG_MAX_ANGLE);
+  G.zen_miss    = false;
+  G.z_spam      = 0;
+  G.flash       = 0;
+  G.shake       = 0;
+  G.sx = G.sy   = 0;
+  G.p_on        = false;
+  G.level_pop   = 0;
+  G.pause_cd    = 0;
+  G.trail_f     = 256;
+  G.pop_t       = 0;
+  G.shine_t     = 0;
+  G.milestone_t   = 0;
+  G.milestone_lvl = 0;
+  G.travel      = 0;
+  G.target      = (int32_t)(rand() % TRIG_MAX_ANGLE);
 }
 
 static void g_next(void) {
@@ -310,8 +327,26 @@ static void g_next(void) {
         G.new_hs = true;
         persist_write_int(PK_HS, G.hs);
       }
+    } else if (G.mode == MODE_ZEN) {
+      if (G.level > G.zhs) {
+        G.zhs = G.level;
+        G.new_hs = true;
+        persist_write_int(PK_ZHS, G.zhs);
+      }
     }
     G.level++;
+    static const int milestones[] = {10, 25, 50, 100};
+    for (int m = 0; m < 4; m++) {
+      if (G.level == milestones[m]) {
+        G.milestone_t   = MILESTONE_FRAMES;
+        G.milestone_lvl = G.level;
+        static const uint32_t segs[] = {100, 100, 100, 100, 100};
+        VibePattern vp = {.durations = segs, .num_segments = 5};
+        vibes_enqueue_custom_pattern(vp);
+        break;
+      }
+    }
+
     int inc = (G.mode == MODE_HARDCORE) ? (SPD_INC * 3 / 2)
             : (G.mode == MODE_ZEN)      ? (SPD_INC / 2)
             :                             SPD_INC;
@@ -365,10 +400,10 @@ static void g_select(void) {
   } else {
     /* ── MISS ── */
     if (G.mode == MODE_ZEN) {
-      /* Anti-spam: check if spamming same area */
-      if (ang_dist(G.angle, G.z_last_ang) < TRIG_MAX_ANGLE / 24) {
-        if (++G.z_spam > 3) {
-          /* Spam detected -> Fail */
+      /* Anti-spam: only triggers when mashing the exact same spot repeatedly */
+      if (ang_dist(G.angle, G.z_last_ang) < TRIG_MAX_ANGLE / 48) {
+        if (++G.z_spam > 9) {
+          /* Extreme spam detected -> Fail */
           goto zen_fail;
         }
       } else {
@@ -404,9 +439,12 @@ static void g_select(void) {
     if (G.mode == MODE_HARDCORE) {
       if (G.level > G.hhs) { G.hhs = G.level; G.new_hs = true;
                               persist_write_int(PK_HHS, G.hhs); }
-    } else {
+    } else if (G.mode == MODE_CLASSIC) {
       if (G.level > G.hs)  { G.hs  = G.level; G.new_hs = true;
                               persist_write_int(PK_HS,  G.hs);  }
+    } else if (G.mode == MODE_ZEN) {
+      if (G.level > G.zhs) { G.zhs = G.level; G.new_hs = true;
+                              persist_write_int(PK_ZHS, G.zhs); }
     }
     static const uint32_t segs[] = {80, 50, 160};
     VibePattern vp = {.durations = segs, .num_segments = 3};
@@ -511,9 +549,9 @@ static void draw_cb(Layer *layer, GContext *ctx) {
 #endif
     graphics_fill_circle(ctx, ip, IND_R);
 
+#ifdef PBL_COLOR
     /* mode-specific color */
     GColor mode_col = GColorIcterine;
-#ifdef PBL_COLOR
     if (G.mode == MODE_HARDCORE) mode_col = GColorImperialPurple;
     if (G.mode == MODE_ZEN)      mode_col = GColorMediumSpringGreen;
 #endif
@@ -567,7 +605,9 @@ static void draw_cb(Layer *layer, GContext *ctx) {
       GTextOverflowModeFill, GTextAlignmentCenter, NULL);
 
     /* best score */
-    int hs = (G.mode == MODE_HARDCORE) ? G.hhs : G.hs;
+    int hs = (G.mode == MODE_HARDCORE) ? G.hhs 
+           : (G.mode == MODE_ZEN)      ? G.zhs
+           :                             G.hs;
     {
       static char hsbuf[20];
       if (hs > 0) snprintf(hsbuf, sizeof(hsbuf), "BEST: %d", hs);
@@ -775,6 +815,47 @@ static void draw_cb(Layer *layer, GContext *ctx) {
     GRect(cx+20, cy-9, 16, 18),
     GTextOverflowModeFill, GTextAlignmentLeft, NULL);
 
+  /* ── milestone banner ── */
+  if (G.milestone_t > 0) {
+    static char mbuf[16];
+    snprintf(mbuf, sizeof(mbuf), "LVL %d!", G.milestone_lvl);
+    GFont mf = fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD);
+    
+    int banner_h = 42;
+    int y_final = cy - 21;
+    int y_start = -banner_h;
+    int y_now = y_final;
+    
+    /* 12-frame slide in/out */
+    int t_in = MILESTONE_FRAMES - G.milestone_t;
+    if (t_in < 12) {
+      y_now = y_start + (y_final - y_start) * t_in / 12;
+    } else if (G.milestone_t < 12) {
+      y_now = y_final + (y_start - y_final) * (12 - G.milestone_t) / 12;
+    }
+
+#ifdef PBL_COLOR
+    graphics_context_set_fill_color(ctx, GColorFromRGBA(255, 255, 0, 150));
+#else
+    graphics_context_set_fill_color(ctx, GColorWhite);
+#endif
+    graphics_fill_rect(ctx, GRect(0, y_now, W, banner_h), 0, GCornerNone);
+
+    /* grid pattern */
+    graphics_context_set_stroke_color(ctx, GColorBlack);
+    graphics_context_set_stroke_width(ctx, 1);
+    for (int gx = 0; gx < W; gx += 6) {
+      graphics_draw_line(ctx, GPoint(gx, y_now), GPoint(gx, y_now + banner_h));
+    }
+    for (int gy = 0; gy < banner_h; gy += 6) {
+      graphics_draw_line(ctx, GPoint(0, y_now + gy), GPoint(W, y_now + gy));
+    }
+
+    graphics_context_set_text_color(ctx, GColorBlack);
+    graphics_draw_text(ctx, mbuf, mf, GRect(0, y_now + 2, W, banner_h),
+      GTextOverflowModeFill, GTextAlignmentCenter, NULL);
+  }
+
   /* ── paused overlay ── */
   if (G.st == ST_PAUSED) {
     /* Full-width inverted band */
@@ -796,11 +877,34 @@ static void draw_cb(Layer *layer, GContext *ctx) {
       graphics_draw_text(ctx, "back to resume", tf,
         GRect(cx-60, cy+14, 120, 18),
         GTextOverflowModeFill, GTextAlignmentCenter, NULL);
+
+      graphics_draw_text(ctx, "UP: SELF DESTRUCT", tf,
+        GRect(cx-70, cy-32, 140, 18),
+        GTextOverflowModeFill, GTextAlignmentCenter, NULL);
     }
   }
 
   /* ── game over overlay ── */
   if (G.st == ST_OVER) {
+    /* radial score spokes */
+    {
+      int spoke_r = (R - 20) * G.level / (G.level + 20) + 20;
+      if (spoke_r > R - 8) spoke_r = R - 8;
+      graphics_context_set_stroke_width(ctx, 1);
+      for (int i = 0; i < 12; i++) {
+        int32_t a = (TRIG_MAX_ANGLE * i) / 12;
+        GPoint inner = radius_pt(a, cx, cy, 26);
+        GPoint outer = radius_pt(a, cx, cy, spoke_r);
+#ifdef PBL_COLOR
+        graphics_context_set_stroke_color(ctx,
+          G.new_hs ? GColorChromeYellow : GColorDarkGray);
+#else
+        graphics_context_set_stroke_color(ctx, GColorDarkGray);
+#endif
+        graphics_draw_line(ctx, inner, outer);
+      }
+    }
+
     GFont sf = fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD);
 #ifdef PBL_COLOR
     graphics_context_set_text_color(ctx,
@@ -851,6 +955,9 @@ static void tick(void *unused) {
 
   /* ring shine decay */
   if (G.shine_t > 0) G.shine_t--;
+
+  /* milestone banner decay */
+  if (G.milestone_t > 0) G.milestone_t--;
 
   /* level-pop bounce decay */
   if (G.level_pop > 0) G.level_pop--;
@@ -919,13 +1026,35 @@ static void btn_any(ClickRecognizerRef r, void *ctx) {
 
 static void btn_up(ClickRecognizerRef r, void *ctx) {
   (void)r; (void)ctx;
-  if (G.st == ST_TITLE) { G.mode = (G.mode + 2) % 3; layer_mark_dirty(s_cvs); }
+  if (G.st == ST_TITLE) { 
+    G.mode = (G.mode + 2) % 3; 
+    vibes_short_pulse();
+    layer_mark_dirty(s_cvs); 
+  } else if (G.st == ST_PAUSED) {
+    /* Self destruct from pause menu! */
+    G.st    = ST_FAIL;
+    G.flash = FLASH_DUR * 2;
+    G.shake = SHAKE_DUR;
+    G.pop_r = RING_RADIUS;
+    G.pop_t = POP_FRAMES / 2;
+#ifdef PBL_COLOR
+    G.fcol = GColorRed;
+#else
+    G.fcol = GColorWhite;
+#endif
+    vibes_double_pulse();
+    layer_mark_dirty(s_cvs);
+  }
   else g_select();
 }
 
 static void btn_down(ClickRecognizerRef r, void *ctx) {
   (void)r; (void)ctx;
-  if (G.st == ST_TITLE) { G.mode = (G.mode + 1) % 3; layer_mark_dirty(s_cvs); }
+  if (G.st == ST_TITLE) { 
+    G.mode = (G.mode + 1) % 3; 
+    vibes_short_pulse();
+    layer_mark_dirty(s_cvs); 
+  }
   else g_select();
 }
 
@@ -933,12 +1062,15 @@ static void btn_back(ClickRecognizerRef r, void *ctx) {
   (void)r; (void)ctx;
   if (G.st == ST_PLAYING) {
     G.st = ST_PAUSED; G.pause_cd = PAUSE_CD;
+    vibes_short_pulse();
   } else if (G.st == ST_PAUSED && G.pause_cd == 0) {
     G.st = ST_PLAYING;
+    vibes_short_pulse();
   } else if (G.st == ST_TITLE) {
     window_stack_pop_all(true);
   } else if (G.st == ST_OVER) {
     g_reset();
+    vibes_short_pulse();
   }
 }
 
@@ -976,10 +1108,12 @@ static void init(void) {
   if (persist_read_int(PK_SCHEMA) != SCHEMA_V) {
     persist_delete(PK_HS);
     persist_delete(PK_HHS);
+    persist_delete(PK_ZHS);
     persist_write_int(PK_SCHEMA, SCHEMA_V);
   }
   G.hs  = persist_exists(PK_HS)  ? persist_read_int(PK_HS)  : 0;
   G.hhs = persist_exists(PK_HHS) ? persist_read_int(PK_HHS) : 0;
+  G.zhs = persist_exists(PK_ZHS) ? persist_read_int(PK_ZHS) : 0;
   G.mode = MODE_CLASSIC;
   g_reset();
 

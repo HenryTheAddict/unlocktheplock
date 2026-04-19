@@ -85,6 +85,8 @@ Discarded input sections
  .bss           0x00000000        0x0 aplite/appinfo.auto.c.57.o
  .text          0x00000000        0x0 aplite/src/resource_ids.auto.c.57.o
  .bss           0x00000000        0x0 aplite/src/resource_ids.auto.c.57.o
+ .data.RESOURCE_ID_IMAGE_APP_ICON
+                0x00000000        0x4 aplite/src/resource_ids.auto.c.57.o
  .text          0x00000000        0x0 src/message_keys.auto.c.57.o
  .bss           0x00000000        0x0 src/message_keys.auto.c.57.o
  .data.MESSAGE_KEY_dummy
@@ -292,6 +294,8 @@ Discarded input sections
  .text.graphics_context_set_text_color_2bit
                 0x00000000        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
  .text.graphics_draw_bitmap_in_rect
+                0x00000000        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+ .text.graphics_draw_pixel
                 0x00000000        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
  .text.graphics_draw_rect
                 0x00000000        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
@@ -846,8 +850,6 @@ Discarded input sections
                 0x00000000        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
  .text.gbitmap_sequence_set_play_count
                 0x00000000        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
- .text.graphics_context_set_antialiased
-                0x00000000        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
  .text.action_bar_layer_add_to_window
                 0x00000000        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
  .text.action_bar_layer_clear_icon
@@ -1117,8 +1119,6 @@ Discarded input sections
  .text.grect_inset
                 0x00000000        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
  .text.gpoint_from_polar
-                0x00000000        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
- .text.graphics_draw_arc
                 0x00000000        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
  .text.grect_centered_from_polar
                 0x00000000        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
@@ -1411,255 +1411,263 @@ LOAD /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/t
  .note.gnu.build-id
                 0x00000084       0x24 linker stubs
 
-.text           0x000000a8     0x14cc
+.text           0x000000a8     0x1894
  *(.text)
  .text          0x000000a8       0x14 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
  *(.text.*)
  .text.parts_update
-                0x000000bc       0x44 src/c/UnlockThePlock.c.57.o
- .text.g_reset  0x00000100       0x34 src/c/UnlockThePlock.c.57.o
+                0x000000bc       0x50 src/c/UnlockThePlock.c.57.o
+ .text.g_reset  0x0000010c       0x40 src/c/UnlockThePlock.c.57.o
  .text.click_config
-                0x00000134       0x40 src/c/UnlockThePlock.c.57.o
- .text.ring_pt  0x00000174       0x3c src/c/UnlockThePlock.c.57.o
+                0x0000014c       0x40 src/c/UnlockThePlock.c.57.o
+ .text.ring_pt  0x0000018c       0x3a src/c/UnlockThePlock.c.57.o
+ *fill*         0x000001c6        0x2 
  .text.win_unload
-                0x000001b0       0x28 src/c/UnlockThePlock.c.57.o
+                0x000001c8       0x28 src/c/UnlockThePlock.c.57.o
  .text.win_load
-                0x000001d8       0xc4 src/c/UnlockThePlock.c.57.o
- .text.tick     0x0000029c      0x20c src/c/UnlockThePlock.c.57.o
+                0x000001f0       0xc4 src/c/UnlockThePlock.c.57.o
+ .text.tick     0x000002b4      0x310 src/c/UnlockThePlock.c.57.o
  .text.btn_back
-                0x000004a8       0x3c src/c/UnlockThePlock.c.57.o
+                0x000005c4       0x4c src/c/UnlockThePlock.c.57.o
  .text.g_select
-                0x000004e4      0x254 src/c/UnlockThePlock.c.57.o
- .text.btn_any  0x00000738        0x4 src/c/UnlockThePlock.c.57.o
+                0x00000610      0x2f0 src/c/UnlockThePlock.c.57.o
  .text.btn_down
-                0x0000073c       0x30 src/c/UnlockThePlock.c.57.o
- .text.btn_up   0x0000076c       0x30 src/c/UnlockThePlock.c.57.o
- .text.draw_cb  0x0000079c      0xa24 src/c/UnlockThePlock.c.57.o
+                0x00000900       0x40 src/c/UnlockThePlock.c.57.o
+ .text.btn_up   0x00000940       0x6c src/c/UnlockThePlock.c.57.o
+ .text.btn_any  0x000009ac        0x4 src/c/UnlockThePlock.c.57.o
+ .text.draw_cb  0x000009b0      0xb58 src/c/UnlockThePlock.c.57.o
  .text.startup.main
-                0x000011c0       0xb8 src/c/UnlockThePlock.c.57.o
-                0x000011c0                main
+                0x00001508       0xd8 src/c/UnlockThePlock.c.57.o
+                0x00001508                main
  .text.app_event_loop
-                0x00001278        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x00001278                app_event_loop
+                0x000015e0        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x000015e0                app_event_loop
  .text.app_timer_cancel
-                0x00001284        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x00001284                app_timer_cancel
+                0x000015ec        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x000015ec                app_timer_cancel
  .text.app_timer_register
-                0x00001290        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x00001290                app_timer_register
+                0x000015f8        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x000015f8                app_timer_register
  .text.cos_lookup
-                0x0000129c        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x0000129c                cos_lookup
+                0x00001604        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x00001604                cos_lookup
  .text.fonts_get_system_font
-                0x000012a8        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x000012a8                fonts_get_system_font
+                0x00001610        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x00001610                fonts_get_system_font
  .text.graphics_draw_circle
-                0x000012b4        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x000012b4                graphics_draw_circle
+                0x0000161c        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x0000161c                graphics_draw_circle
  .text.graphics_draw_line
-                0x000012c0        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x000012c0                graphics_draw_line
- .text.graphics_draw_pixel
-                0x000012cc        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x000012cc                graphics_draw_pixel
+                0x00001628        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x00001628                graphics_draw_line
  .text.graphics_draw_round_rect
-                0x000012d8        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x000012d8                graphics_draw_round_rect
+                0x00001634        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x00001634                graphics_draw_round_rect
  .text.graphics_fill_circle
-                0x000012e4        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x000012e4                graphics_fill_circle
+                0x00001640        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x00001640                graphics_fill_circle
  .text.graphics_fill_rect
-                0x000012f0        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x000012f0                graphics_fill_rect
+                0x0000164c        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x0000164c                graphics_fill_rect
  .text.layer_add_child
-                0x000012fc        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x000012fc                layer_add_child
+                0x00001658        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x00001658                layer_add_child
  .text.layer_create
-                0x00001308        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x00001308                layer_create
+                0x00001664        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x00001664                layer_create
  .text.layer_destroy
-                0x00001314        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x00001314                layer_destroy
+                0x00001670        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x00001670                layer_destroy
  .text.layer_get_bounds
-                0x00001320        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x00001320                layer_get_bounds
+                0x0000167c        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x0000167c                layer_get_bounds
  .text.layer_mark_dirty
-                0x0000132c        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x0000132c                layer_mark_dirty
+                0x00001688        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x00001688                layer_mark_dirty
  .text.layer_set_update_proc
-                0x00001338        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x00001338                layer_set_update_proc
+                0x00001694        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x00001694                layer_set_update_proc
  .text.light_enable_interaction
-                0x00001344        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x00001344                light_enable_interaction
+                0x000016a0        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x000016a0                light_enable_interaction
  .text.persist_delete
-                0x00001350        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x00001350                persist_delete
+                0x000016ac        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x000016ac                persist_delete
  .text.persist_exists
-                0x0000135c        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x0000135c                persist_exists
+                0x000016b8        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x000016b8                persist_exists
  .text.persist_read_int
-                0x00001368        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x00001368                persist_read_int
+                0x000016c4        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x000016c4                persist_read_int
  .text.persist_write_int
-                0x00001374        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x00001374                persist_write_int
- .text.rand     0x00001380        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x00001380                rand
+                0x000016d0        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x000016d0                persist_write_int
+ .text.rand     0x000016dc        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x000016dc                rand
  .text.sin_lookup
-                0x0000138c        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x0000138c                sin_lookup
+                0x000016e8        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x000016e8                sin_lookup
  .text.snprintf
-                0x00001398        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x00001398                snprintf
- .text.strcpy   0x000013a4        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x000013a4                strcpy
+                0x000016f4        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x000016f4                snprintf
+ .text.strcpy   0x00001700        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x00001700                strcpy
  .text.vibes_double_pulse
-                0x000013b0        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x000013b0                vibes_double_pulse
+                0x0000170c        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x0000170c                vibes_double_pulse
  .text.vibes_enqueue_custom_pattern
-                0x000013bc        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x000013bc                vibes_enqueue_custom_pattern
+                0x00001718        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x00001718                vibes_enqueue_custom_pattern
  .text.vibes_short_pulse
-                0x000013c8        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x000013c8                vibes_short_pulse
+                0x00001724        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x00001724                vibes_short_pulse
  .text.window_create
-                0x000013d4        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x000013d4                window_create
+                0x00001730        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x00001730                window_create
  .text.window_destroy
-                0x000013e0        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x000013e0                window_destroy
+                0x0000173c        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x0000173c                window_destroy
  .text.window_get_root_layer
-                0x000013ec        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x000013ec                window_get_root_layer
+                0x00001748        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x00001748                window_get_root_layer
  .text.window_set_click_config_provider
-                0x000013f8        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x000013f8                window_set_click_config_provider
+                0x00001754        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x00001754                window_set_click_config_provider
  .text.window_set_window_handlers
-                0x00001404        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x00001404                window_set_window_handlers
+                0x00001760        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x00001760                window_set_window_handlers
  .text.window_stack_pop_all
-                0x00001410        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x00001410                window_stack_pop_all
+                0x0000176c        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x0000176c                window_stack_pop_all
  .text.window_stack_push
-                0x0000141c        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x0000141c                window_stack_push
+                0x00001778        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x00001778                window_stack_push
  .text.window_single_click_subscribe
-                0x00001428        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x00001428                window_single_click_subscribe
+                0x00001784        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x00001784                window_single_click_subscribe
  .text.graphics_draw_text
-                0x00001434        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x00001434                graphics_draw_text
+                0x00001790        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x00001790                graphics_draw_text
  .text.graphics_context_set_fill_color
-                0x00001440        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x00001440                graphics_context_set_fill_color
+                0x0000179c        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x0000179c                graphics_context_set_fill_color
  .text.graphics_context_set_stroke_color
-                0x0000144c        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x0000144c                graphics_context_set_stroke_color
+                0x000017a8        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x000017a8                graphics_context_set_stroke_color
  .text.graphics_context_set_text_color
-                0x00001458        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x00001458                graphics_context_set_text_color
+                0x000017b4        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x000017b4                graphics_context_set_text_color
  .text.window_set_background_color
-                0x00001464        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x00001464                window_set_background_color
+                0x000017c0        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x000017c0                window_set_background_color
+ .text.graphics_context_set_antialiased
+                0x000017cc        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x000017cc                graphics_context_set_antialiased
  .text.graphics_context_set_stroke_width
-                0x00001470        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x00001470                graphics_context_set_stroke_width
+                0x000017d8        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x000017d8                graphics_context_set_stroke_width
+ .text.graphics_draw_arc
+                0x000017e4        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x000017e4                graphics_draw_arc
  .text.graphics_fill_radial
-                0x0000147c        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
-                0x0000147c                graphics_fill_radial
+                0x000017f0        0xc /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+                0x000017f0                graphics_fill_radial
  *(.rodata)
  *(.rodata*)
  .rodata.draw_cb.str1.1
-                0x00001488       0xdd src/c/UnlockThePlock.c.57.o
-                                 0xcb (size before relaxing)
+                0x000017fc      0x114 src/c/UnlockThePlock.c.57.o
+                                0x102 (size before relaxing)
  .rodata.str1.1
-                0x00001565       0x15 src/c/UnlockThePlock.c.57.o
- *fill*         0x00001565        0x3 
- .rodata.segs.0
-                0x00001568        0xc src/c/UnlockThePlock.c.57.o
+                0x00001910       0x15 src/c/UnlockThePlock.c.57.o
+ .rodata.segs.2
+                0x00001910       0x14 src/c/UnlockThePlock.c.57.o
+ .rodata.segments.0
+                0x00001924        0xc src/c/UnlockThePlock.c.57.o
+ .rodata.segs.1
+                0x00001930        0xc src/c/UnlockThePlock.c.57.o
 
-.glue_7         0x00001574        0x0
- .glue_7        0x00001574        0x0 linker stubs
+.glue_7         0x0000193c        0x0
+ .glue_7        0x0000193c        0x0 linker stubs
 
-.glue_7t        0x00001574        0x0
- .glue_7t       0x00001574        0x0 linker stubs
+.glue_7t        0x0000193c        0x0
+ .glue_7t       0x0000193c        0x0 linker stubs
 
-.vfp11_veneer   0x00001574        0x0
- .vfp11_veneer  0x00001574        0x0 linker stubs
+.vfp11_veneer   0x0000193c        0x0
+ .vfp11_veneer  0x0000193c        0x0 linker stubs
 
-.v4_bx          0x00001574        0x0
- .v4_bx         0x00001574        0x0 linker stubs
+.v4_bx          0x0000193c        0x0
+ .v4_bx         0x0000193c        0x0 linker stubs
 
-.init           0x00001574        0x4
- .init          0x00001574        0x4 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/thumb/v7-m/nofp/crti.o
-                0x00001574                _init
+.init           0x0000193c        0x4
+ .init          0x0000193c        0x4 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/thumb/v7-m/nofp/crti.o
+                0x0000193c                _init
 
-.fini           0x00001578        0x4
- .fini          0x00001578        0x4 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/thumb/v7-m/nofp/crti.o
-                0x00001578                _fini
+.fini           0x00001940        0x4
+ .fini          0x00001940        0x4 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/thumb/v7-m/nofp/crti.o
+                0x00001940                _fini
 
-.iplt           0x0000157c        0x0
- .iplt          0x0000157c        0x0 src/c/UnlockThePlock.c.57.o
+.iplt           0x00001944        0x0
+ .iplt          0x00001944        0x0 src/c/UnlockThePlock.c.57.o
 
-.rel.dyn        0x0000157c        0x0
- .rel.iplt      0x0000157c        0x0 src/c/UnlockThePlock.c.57.o
+.rel.dyn        0x00001944        0x0
+ .rel.iplt      0x00001944        0x0 src/c/UnlockThePlock.c.57.o
 
-.data           0x0000157c        0xc
+.data           0x00001944        0xc
  *(.data)
- .data          0x0000157c        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/thumb/v7-m/nofp/crti.o
- .data          0x0000157c        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/thumb/v7-m/nofp/crtbegin.o
- .data          0x0000157c        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/crt0.o
- .data          0x0000157c        0xc src/c/UnlockThePlock.c.57.o
- .data          0x00001588        0x0 src/c/game_engine.c.57.o
- .data          0x00001588        0x0 src/c/renderer.c.57.o
- .data          0x00001588        0x0 aplite/appinfo.auto.c.57.o
- .data          0x00001588        0x0 aplite/src/resource_ids.auto.c.57.o
- .data          0x00001588        0x0 src/message_keys.auto.c.57.o
- .data          0x00001588        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
- .data          0x00001588        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-atexit.o)
- .data          0x00001588        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-exit.o)
- .data          0x00001588        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-findfp.o)
- .data          0x00001588        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-impure.o)
- .data          0x00001588        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-init.o)
- .data          0x00001588        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-fini.o)
- .data          0x00001588        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-lock.o)
- .data          0x00001588        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-__atexit.o)
- .data          0x00001588        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-__call_atexit.o)
- .data          0x00001588        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-mallocr.o)
- .data          0x00001588        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-mlock.o)
- .data          0x00001588        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-fwalk.o)
- .data          0x00001588        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-fclose.o)
- .data          0x00001588        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-fflush.o)
- .data          0x00001588        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-stdio.o)
- .data          0x00001588        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-closer.o)
- .data          0x00001588        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-reent.o)
- .data          0x00001588        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-lseekr.o)
- .data          0x00001588        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-readr.o)
- .data          0x00001588        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-sbrkr.o)
- .data          0x00001588        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-writer.o)
- .data          0x00001588        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-sysconf.o)
- .data          0x00001588        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-freer.o)
- .data          0x00001588        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-errno.o)
- .data          0x00001588        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/thumb/v7-m/nofp/crtend.o
- .data          0x00001588        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/thumb/v7-m/nofp/crtn.o
+ .data          0x00001944        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/thumb/v7-m/nofp/crti.o
+ .data          0x00001944        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/thumb/v7-m/nofp/crtbegin.o
+ .data          0x00001944        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/crt0.o
+ .data          0x00001944        0xc src/c/UnlockThePlock.c.57.o
+ .data          0x00001950        0x0 src/c/game_engine.c.57.o
+ .data          0x00001950        0x0 src/c/renderer.c.57.o
+ .data          0x00001950        0x0 aplite/appinfo.auto.c.57.o
+ .data          0x00001950        0x0 aplite/src/resource_ids.auto.c.57.o
+ .data          0x00001950        0x0 src/message_keys.auto.c.57.o
+ .data          0x00001950        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/lib/libpebble.a(tmp7jpKUopebble.o)
+ .data          0x00001950        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-atexit.o)
+ .data          0x00001950        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-exit.o)
+ .data          0x00001950        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-findfp.o)
+ .data          0x00001950        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-impure.o)
+ .data          0x00001950        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-init.o)
+ .data          0x00001950        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-fini.o)
+ .data          0x00001950        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-lock.o)
+ .data          0x00001950        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-__atexit.o)
+ .data          0x00001950        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-__call_atexit.o)
+ .data          0x00001950        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-mallocr.o)
+ .data          0x00001950        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-mlock.o)
+ .data          0x00001950        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-fwalk.o)
+ .data          0x00001950        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-fclose.o)
+ .data          0x00001950        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-fflush.o)
+ .data          0x00001950        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-stdio.o)
+ .data          0x00001950        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-closer.o)
+ .data          0x00001950        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-reent.o)
+ .data          0x00001950        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-lseekr.o)
+ .data          0x00001950        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-readr.o)
+ .data          0x00001950        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-sbrkr.o)
+ .data          0x00001950        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-writer.o)
+ .data          0x00001950        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-sysconf.o)
+ .data          0x00001950        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-freer.o)
+ .data          0x00001950        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-errno.o)
+ .data          0x00001950        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/thumb/v7-m/nofp/crtend.o
+ .data          0x00001950        0x0 /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/thumb/v7-m/nofp/crtn.o
  *(.data.*)
 
-.igot.plt       0x00001588        0x0
- .igot.plt      0x00001588        0x0 src/c/UnlockThePlock.c.57.o
+.igot.plt       0x00001950        0x0
+ .igot.plt      0x00001950        0x0 src/c/UnlockThePlock.c.57.o
 
-.bss            0x00001588      0x588
+.bss            0x00001950      0x404
  *(.bss)
  *(.bss.*)
- .bss.hs_buf.1  0x00001588       0x14 src/c/UnlockThePlock.c.57.o
- .bss.cdbuf.2   0x0000159c       0x10 src/c/UnlockThePlock.c.57.o
- .bss.lvl_buf.3
-                0x000015ac        0x8 src/c/UnlockThePlock.c.57.o
- .bss.hsbuf.4   0x000015b4       0x14 src/c/UnlockThePlock.c.57.o
- .bss.G         0x000015c8      0x53c src/c/UnlockThePlock.c.57.o
- .bss.s_tmr     0x00001b04        0x4 src/c/UnlockThePlock.c.57.o
- .bss.s_cvs     0x00001b08        0x4 src/c/UnlockThePlock.c.57.o
- .bss.s_win     0x00001b0c        0x4 src/c/UnlockThePlock.c.57.o
+ .bss.hs_buf.3  0x00001950       0x14 src/c/UnlockThePlock.c.57.o
+ .bss.cdbuf.4   0x00001964       0x10 src/c/UnlockThePlock.c.57.o
+ .bss.mbuf.5    0x00001974       0x10 src/c/UnlockThePlock.c.57.o
+ .bss.lvl_buf.6
+                0x00001984        0x8 src/c/UnlockThePlock.c.57.o
+ .bss.hsbuf.7   0x0000198c       0x14 src/c/UnlockThePlock.c.57.o
+ .bss.G         0x000019a0      0x3a8 src/c/UnlockThePlock.c.57.o
+ .bss.s_tmr     0x00001d48        0x4 src/c/UnlockThePlock.c.57.o
+ .bss.s_cvs     0x00001d4c        0x4 src/c/UnlockThePlock.c.57.o
+ .bss.s_win     0x00001d50        0x4 src/c/UnlockThePlock.c.57.o
 
 DISCARD
  libc.a(*)
@@ -1782,26 +1790,26 @@ LOAD /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/t
  .comment       0x00000039       0x3a /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/libc.a(libc_a-errno.o)
  .comment       0x00000039       0x3a /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/toolchain/arm-none-eabi/bin/../lib/gcc/arm-none-eabi/14.2.1/thumb/v7-m/nofp/crtend.o
 
-.debug_info     0x00000000     0x29cb
- .debug_info    0x00000000     0x24b3 src/c/UnlockThePlock.c.57.o
- .debug_info    0x000024b3       0x73 src/c/game_engine.c.57.o
- .debug_info    0x00002526       0x73 src/c/renderer.c.57.o
- .debug_info    0x00002599      0x33e aplite/appinfo.auto.c.57.o
- .debug_info    0x000028d7       0x65 aplite/src/resource_ids.auto.c.57.o
- .debug_info    0x0000293c       0x8f src/message_keys.auto.c.57.o
+.debug_info     0x00000000     0x2e2a
+ .debug_info    0x00000000     0x28e8 src/c/UnlockThePlock.c.57.o
+ .debug_info    0x000028e8       0x73 src/c/game_engine.c.57.o
+ .debug_info    0x0000295b       0x73 src/c/renderer.c.57.o
+ .debug_info    0x000029ce      0x33e aplite/appinfo.auto.c.57.o
+ .debug_info    0x00002d0c       0x8f aplite/src/resource_ids.auto.c.57.o
+ .debug_info    0x00002d9b       0x8f src/message_keys.auto.c.57.o
 
-.debug_abbrev   0x00000000      0x6de
- .debug_abbrev  0x00000000      0x56b src/c/UnlockThePlock.c.57.o
- .debug_abbrev  0x0000056b       0x26 src/c/game_engine.c.57.o
- .debug_abbrev  0x00000591       0x26 src/c/renderer.c.57.o
- .debug_abbrev  0x000005b7       0xb9 aplite/appinfo.auto.c.57.o
- .debug_abbrev  0x00000670       0x26 aplite/src/resource_ids.auto.c.57.o
- .debug_abbrev  0x00000696       0x48 src/message_keys.auto.c.57.o
+.debug_abbrev   0x00000000      0x733
+ .debug_abbrev  0x00000000      0x59e src/c/UnlockThePlock.c.57.o
+ .debug_abbrev  0x0000059e       0x26 src/c/game_engine.c.57.o
+ .debug_abbrev  0x000005c4       0x26 src/c/renderer.c.57.o
+ .debug_abbrev  0x000005ea       0xb9 aplite/appinfo.auto.c.57.o
+ .debug_abbrev  0x000006a3       0x48 aplite/src/resource_ids.auto.c.57.o
+ .debug_abbrev  0x000006eb       0x48 src/message_keys.auto.c.57.o
 
 .debug_loclists
-                0x00000000      0xc4c
+                0x00000000      0xe67
  .debug_loclists
-                0x00000000      0xc4c src/c/UnlockThePlock.c.57.o
+                0x00000000      0xe67 src/c/UnlockThePlock.c.57.o
 
 .debug_aranges  0x00000000      0x100
  .debug_aranges
@@ -1818,26 +1826,26 @@ LOAD /Users/henryperzinski/Library/Application Support/Pebble SDK/SDKs/4.9.148/t
                 0x000000e8       0x18 src/message_keys.auto.c.57.o
 
 .debug_rnglists
-                0x00000000      0x246
+                0x00000000      0x221
  .debug_rnglists
-                0x00000000      0x246 src/c/UnlockThePlock.c.57.o
+                0x00000000      0x221 src/c/UnlockThePlock.c.57.o
 
-.debug_line     0x00000000     0x193f
- .debug_line    0x00000000     0x1578 src/c/UnlockThePlock.c.57.o
- .debug_line    0x00001578       0x37 src/c/game_engine.c.57.o
- .debug_line    0x000015af       0x34 src/c/renderer.c.57.o
- .debug_line    0x000015e3      0x1c8 aplite/appinfo.auto.c.57.o
- .debug_line    0x000017ab       0x3f aplite/src/resource_ids.auto.c.57.o
- .debug_line    0x000017ea      0x155 src/message_keys.auto.c.57.o
+.debug_line     0x00000000     0x1d5c
+ .debug_line    0x00000000     0x1878 src/c/UnlockThePlock.c.57.o
+ .debug_line    0x00001878       0x37 src/c/game_engine.c.57.o
+ .debug_line    0x000018af       0x34 src/c/renderer.c.57.o
+ .debug_line    0x000018e3      0x1c8 aplite/appinfo.auto.c.57.o
+ .debug_line    0x00001aab      0x15c aplite/src/resource_ids.auto.c.57.o
+ .debug_line    0x00001c07      0x155 src/message_keys.auto.c.57.o
 
-.debug_str      0x00000000      0xdd2
- .debug_str     0x00000000      0xdd2 src/c/UnlockThePlock.c.57.o
-                                0xab0 (size before relaxing)
- .debug_str     0x00000dd2      0x16e src/c/game_engine.c.57.o
- .debug_str     0x00000dd2      0x16b src/c/renderer.c.57.o
- .debug_str     0x00000dd2      0x4d7 aplite/appinfo.auto.c.57.o
- .debug_str     0x00000dd2      0x16b aplite/src/resource_ids.auto.c.57.o
- .debug_str     0x00000dd2      0x18a src/message_keys.auto.c.57.o
+.debug_str      0x00000000      0xeaf
+ .debug_str     0x00000000      0xeaf src/c/UnlockThePlock.c.57.o
+                                0xb74 (size before relaxing)
+ .debug_str     0x00000eaf      0x16e src/c/game_engine.c.57.o
+ .debug_str     0x00000eaf      0x16b src/c/renderer.c.57.o
+ .debug_str     0x00000eaf      0x4d7 aplite/appinfo.auto.c.57.o
+ .debug_str     0x00000eaf      0x19a aplite/src/resource_ids.auto.c.57.o
+ .debug_str     0x00000eaf      0x18a src/message_keys.auto.c.57.o
 
-.debug_frame    0x00000000      0x1e4
- .debug_frame   0x00000000      0x1e4 src/c/UnlockThePlock.c.57.o
+.debug_frame    0x00000000      0x230
+ .debug_frame   0x00000000      0x230 src/c/UnlockThePlock.c.57.o

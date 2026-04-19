@@ -19,13 +19,20 @@
         "dummy": 10000
     },
     "resources": {
-        "media": []
+        "media": [
+            {
+                "type": "png",
+                "name": "IMAGE_APP_ICON",
+                "file": "appicon.png",
+                "menuIcon": true
+            }
+        ]
     },
     "name": "UnlockThePlock",
     "shortName": "UnlockThePlock",
     "longName": "UnlockThePlock",
     "versionLabel": "1.0",
-    "companyName": "MakeAwesomeHappen",
+    "companyName": "h3nry.xyz",
     "appKeys": {
         "dummy": 10000
     },
